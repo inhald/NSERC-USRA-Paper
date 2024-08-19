@@ -134,7 +134,7 @@ algorithms used to detect obstacles and the control strategy used to navigate ar
 Obstacle avoidance, a basic task in self-driving, is the backbone of autonomous navigation. Approaches to this task evolved from the Bug Algorithm in favor of path planning algorithms such as A* or Dijkstra on a local cost map \cite{b1}. In recent times, strategies to this task have now adopted machine learning flavor, giving rise to the optimization-based and model predictive control algorithms.    
 Moreover, a critical aspect of successful obstacle avoidance hinges on accurate detection, for which a myriad of sensors can be employed to continuously scan the surroundings and identify obstacles. The most commonly used sensors for detection are LiDAR and camera, giving rise to LiDAR-based and vision-based approaches respectively \cite{b2}. 
 
-Vision-based approaches use either computer vision (CV) or machine learning, specifically Convolutional Neural Network (CNN)-based algorithms such as in \cite{b3}. In the context of small-scale autonomous driving, the primary limitation to this approach is the restricted awareness of the surroundings due to the narrow field of vision captured by the camera sampling data. On the other hand, 2D Lidar-based methods, such as the Follow the Gap Method Method described by Sezer et al. in \cite{b4}, analyze raw returns to detect obstacles. Yet, relying solely on data sampled from a single plane can lead to potential blind spots and missed obstacles. By integrating data from both systems, this paper aims to overcome the limitations of both approaches.
+Vision-based approaches use either computer vision (CV) or machine learning, specifically Convolutional Neural Network (CNN)-based algorithms such as in \cite{b3}. In the context of small-scale autonomous driving, the primary limitation to this approach is the restricted awareness of the surroundings due to the narrow field of vision captured by the camera sampling data. On the other hand, 2D Lidar-based methods, such as the Follow the Gap Method Method described by Sezer et al. in \cite{b4}, analyze raw returns to detect obstacles. Yet, relying solely on data sampled from a single plane can lead to potential blind spots and missed obstacles. This paper overcomes the limitations of both approaches by proposing a methodology of fusing the data and improves on existing optimization-based control algorithms to navigate around the detected obstacles.
 
 \section{Used Algorithms}
 The algorithm used for autonomous navigation follow the pipeline shown in the Figure.   
@@ -148,13 +148,11 @@ The algorithm used for autonomous navigation follow the pipeline shown in the Fi
 
 \subsection{Calculating Heading Angle}
 
-The LiDAR scans are captured and pre-processed as pairs $(\theta_i, r_i)$ of beam angles and corresponding range measurements. The scans are processed, assigning 
+The LiDAR scans are captured and pre-processed as pairs $(\theta_i, r_i)$ of beam angles and corresponding range measurements. The scans are processed, assigning beam angles as increments of the LiDAR resolution with respect to the center of a predefined field of vision, namely $-\theta_{cen} \leq \theta \leq \theta_{cen}$ and ranges $0 \leq r_i \leq r_{max}$, where $r_{max}$ is the maximum LiDAR scan range. 
 
-The angle, $\theta_{head}$, represents the desired direction of travel of the vehicle and acts as a reference to separate returns on the left and right sides of the vehicle in any orientation. 
+The heading angle, $\theta_{head}$, represents the desired direction of travel of the vehicle and acts as a reference to separate scans on the left and right sides of the vehicle in any orientation. It is calculated as a weighted average of beam angles based on the processed data:
 
 \[\theta_{head} = \frac{\sum_{i} r_i \theta_i}{\sum_{i} r_i} \]
-
-The vehicle's heading angle $\theta_{head}$ is calculated as a weighted average of the LiDAR beam angles within a pre-defined field of vision:
 
 Two design parameters $\alpha_l$ and $\beta_l$, which are angles oriented on the left of $\theta_{head}$, are chosen.  The range measurements between these two angles are sampled and used to calculate the left barrier, as described in Section B below. Similarly, on the right side, $\alpha_r$ and $\beta_r$ are chosen, and the corresponding range measurements are used to calculate the right barrier. 
 

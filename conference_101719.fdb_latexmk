@@ -1,7 +1,7 @@
 # Fdb version 3
-["pdflatex"] 1724101436 "/home/dhilan/latex_projects/a_ros_based_approach/conference_101719.tex" "conference_101719.pdf" "conference_101719" 1724101438
+["pdflatex"] 1724107990 "/home/dhilan/latex_projects/a_ros_based_approach/conference_101719.tex" "conference_101719.pdf" "conference_101719" 1724107991
   "/etc/texmf/web2c/texmf.cnf" 1723745978 475 c0e671620eb5563b2130f56340a5fde8 ""
-  "/home/dhilan/latex_projects/a_ros_based_approach/conference_101719.tex" 1724101435 46740 b6b06c138e7f35c15d73a727d309173a ""
+  "/home/dhilan/latex_projects/a_ros_based_approach/conference_101719.tex" 1724107989 47075 2edffc36601a0c572b9a1b19953ed2b0 ""
   "/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc" 1165713224 4850 80dc9bab7f31fb78a000ccfed0e27cab ""
   "/usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/adobe/times/ptmb7t.tfm" 1136768653 2172 fd0c924230362ff848a33632ed45dc23 ""
@@ -101,8 +101,8 @@
   "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1723750856 2798823 a06c2b51c52caaba385d989edf96e531 ""
   "IEEEtran.cls" 1723779200 281957 5b2e4fa15b0f7eabb840ebf67df4c0f7 ""
   "autonomous_architecture.png" 1723779200 80928 778e28b8a5778d83b915dbd680ccac24 ""
-  "conference_101719.aux" 1724101437 3280 0ecfb61afdede420d655023d1533daec "pdflatex"
-  "conference_101719.tex" 1724101435 46740 b6b06c138e7f35c15d73a727d309173a ""
+  "conference_101719.aux" 1724107991 3280 445f85c1cc270f3349b04c700d4b8a6e "pdflatex"
+  "conference_101719.tex" 1724107989 47075 2edffc36601a0c572b9a1b19953ed2b0 ""
   "diagram.png" 1723779200 120384 5dc1e35ebbddf3920d0b116068545c7f ""
   "lidar_diagram.png" 1723779200 406515 c28cc7dc3e4f055e966fc978aae51f44 ""
   "motor_ctrl_diagram.png" 1723779200 709874 701e0ae8bf05135f00ff4ab75576ab70 ""
