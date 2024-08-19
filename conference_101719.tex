@@ -83,9 +83,32 @@ Computational Efficiency, Obstacle Avoidance
 % Please observe the conference page limits. 
 
 
-Autonomous driving has undergone substantial development over the past few decades, driven by researchers and industry partners alike. For local path-planning, vehicles leverage algorithms  designed specially for obstacle avoidance which utilize sensory modules to gain an understanding of the surrounding environment. However, the deployment of algorithm-based navigation on real vehicles is impeded by financial limitations due to the associated cost of sensors and vehicle parts. For this purpose, small-scale vehicle platforms have emerged as ideal choice for educational and research purposes. 
+%Problem: 1:10 autonomous vehicles are difficult to design, as sensory units required for navigation are often prohibitively expensive.
+%Solution: by leveraging sensor fusion, the macAEV car can sucessfully perform both obstacle avoidance and detection in real time using relatively inexpensive equipment. 
 
-This paper uses the McMaster Autonomous Electrified Vehicle (MacAEV), one such 1:10 vehicle platform, equipped with an Intel RealSense Stereo Depth camera and a SLAMTEK A2M8 RPLidar to detect obstacles. Together, these sensory modules form a suitable alternative to a high resolution laser scanner, through a low-cost approach to obstacle avoidance using sensor fusion. Furthermore, the software architecture of the embedded system is developed using C++ in ROS 2, ensuring an optimized real-time performance. 
+%----- Introduction Structure ----
+%  Problem introduction
+%   Maybe exagerate the need for this, explain that faulty algorithms could cost lives. 
+%   a) P1: Researchers need ways to prototype  self-driving algorithms in low-risk settings. 
+%   b) solution is 
+
+
+
+% Autonomous driving has undergone substantial development over the past few decades, driven by researchers and industry partners alike. For local path-planning, vehicles leverage algorithms  designed specially for obstacle avoidance which utilize sensory modules to gain an understanding of the surrounding environment. However, the deployment of algorithm-based navigation on real vehicles is impeded by financial limitations due to the associated cost of sensors and vehicle parts. For this purpose, small-scale vehicle platforms have emerged as ideal choice for educational and research purposes. 
+
+%more specific
+Autonomous driving has undergone substantial development over the past few decades, driven by researchers and industry partners alike. However, the testing and development of self-driving algorithms on real vehicles is often impeded by the risk posed to human lives. As such, scaled vehicles have emerged as the most suitable alternative for autonomous driving research, permitting researchers to perform rigorous testing of novel algorithms in low-risk settings. 
+
+%discuss levels of autonomy 
+
+For local path-planning, scaled vehicles leverage algorithms designed for obstacle avoidance, utilizing sensory modules to first detect objects followed by a control strategy to navigate around them. Light Detection and Ranging (LiDAR), an active sensor, is commonly used as a sensory module for these tasks due to the relability of its point cloud data. LiDARs are classified as either 2D or 3D: 3D LiDARs emit multiple laser beams in three dimensional space, while in contrast, 2D LiDARs produces a single beam at a time and yield a plane scanning. These advanced scanning features of 3D LiDAR scanners can be prohibitively expensive, restricting some researchers from employing scaled vehicles to the field of autonomous driving.
+
+In this paper, the McMaster Autonomous Electrified Vehicle (MacAEV), a scaled vehicle designed at McMaster University (shown in Figure 1), utilizes sensor fusion to detect and avoid obstacles in real-time along a corridor. It is equipped with both a depth camera and a 2D LiDAR, which are interfaced with an embeded computer through Robot Operating System 2 (ROS 2). The data sampled by both sensors is manipulated and fused in C++, and an optimization-based control algorithm, described in Section II, is applied to avoid the detected obstacles. 
+
+
+% Together, these sensory modules form a less expensive alternative to a high resolution laser scanner, through a low computational expense approach to obstacle avoidance using sensor fusion. 
+
+% Furthermore, the software architecture of the embedded system is developed using C++ in ROS 2, ensuring an optimized real-time performance. 
 
 \begin{figure}
     \centering
@@ -100,65 +123,21 @@ This paper uses the McMaster Autonomous Electrified Vehicle (MacAEV), one such 1
 
 % ROS 2 software is organized into packages, which are built through \textit{ament\textunderscore cmake} system and use \textit{colcon} as build tool. Packages facilitates the decomposition of ROS-based applications into modular units, that are easily integrable into various robotic systems or applications. This modular approach enhances reusability and modularity across different contexts. Furthermore, packages in ROS 2 encourage a collaborate development environment where developers can share and leverage existing components, which accelerates the development of complex robotic systems involved in various tasks such as obstacle avoidance, path planning and car following.  
 
- Obstacle avoidance, a basic task in autonomous driving, is the backbone of autonomous navigation. Approaches to this task evolved from the Bug Algorithm in favor of path planning algorithms such as A* or Dijkstra on a local cost map \cite{b1}. In recent times, strategies to this task have now adopted machine learning flavor, giving rise to the optimization-based navigation algorithm used in this paper. 
- Moreover, a critical aspect of successful obstacle avoidance hinges on accurate detection, for which a myriad of sensors can be employed to continuously scan the surroundings and identify obstacles. The most commonly used sensors for detection are Lidar and camera, giving rise to Lidar-based and vision-based approaches respectively \cite{b2}. 
- 
- Vision-based approaches use either computer vision (CV) or machine learning, specifically Convolutional Neural Network (CNN)-based algorithms such as in \cite{b3}. In the context of small-scale autonomous driving, the primary limitation to this approach is the restricted awareness of the vehicle's surroundings due to the narrow field of vision captured by the camera sampling data. On the other hand, 2D Lidar-based methods, such as the Follow the Gap Method Method described by Sezer et al. in \cite{b4}, analyze raw returns to detect obstacles. Yet, relying solely on data sampled from a single plane can lead to potential blind spots and missed obstacles. By integrating data from both systems, this paper aims to overcome the limitations of both approaches.
-
 % Examples of commonly used CNN models include Adaptive Spatial Feature Fusion (ASFF), CenterNet, EfficientDet and You Only Look Once (YOLO).
 
-The paper is structured as follows: Section II introduces the hardware architecture of the autonomous vehicle. Section III examines the optimization-based autonomous navigation approach. Section IV discusses the software architecture of the system with specific insights into the data fusion and ground plane filtering algorithms. Section V demonstrates the experimental results and Section IV concludes the paper and presents future directions. 
+The paper is structured as follows: Section II examines related work. Section III discusses the 
+algorithms used to detect obstacles and the control strategy used to navigate around them. Section IV examines the hardware components of the MacAEV and interfacing them through ROS 2. Section V discusses the implementation details of the system with specific insights into the data fusion and ground plane filtering algorithms. Section VI demonstrates the experimental results, showing sucessful obstacle detection and avoidance and Section VII concludes the paper and presents future directions. 
 
 
   % Monocular vision image-based methods for small-scale cars can be further subcategorized into three types:  appearance-based, motion-based and depth-based. Appearance-based methods identify obstacles in the foreground based on visual appearance. Motion-based methods detect objects using motion vectors. Depth-based methods determine the spatial arrangement of objects by utilizing depth. 
+\section{Related Work}
+Obstacle avoidance, a basic task in self-driving, is the backbone of autonomous navigation. Approaches to this task evolved from the Bug Algorithm in favor of path planning algorithms such as A* or Dijkstra on a local cost map \cite{b1}. In recent times, strategies to this task have now adopted machine learning flavor, giving rise to the optimization-based and model predictive control algorithms.    
+Moreover, a critical aspect of successful obstacle avoidance hinges on accurate detection, for which a myriad of sensors can be employed to continuously scan the surroundings and identify obstacles. The most commonly used sensors for detection are LiDAR and camera, giving rise to LiDAR-based and vision-based approaches respectively \cite{b2}. 
 
+Vision-based approaches use either computer vision (CV) or machine learning, specifically Convolutional Neural Network (CNN)-based algorithms such as in \cite{b3}. In the context of small-scale autonomous driving, the primary limitation to this approach is the restricted awareness of the surroundings due to the narrow field of vision captured by the camera sampling data. On the other hand, 2D Lidar-based methods, such as the Follow the Gap Method Method described by Sezer et al. in \cite{b4}, analyze raw returns to detect obstacles. Yet, relying solely on data sampled from a single plane can lead to potential blind spots and missed obstacles. By integrating data from both systems, this paper aims to overcome the limitations of both approaches.
 
-
-\section{System Design}
-
-
-
-
-% \subsection{Convex Model-Predictive Control}
-% The discrete linear quadratic regulator can be extended to include inequality constraints through convex model-predictive control (MPC). 
-
-In this section, the hardware architecture and technical specifications of the MacAEV are presented.
-
-\subsection{Hardware Architecture}
-
-The McMaster AEV car, powered by a VENOM 3S lithium-polymer (LiPo) Battery, is built on an ARMA GRANITE 4x4 vehicle platform and consists of a multitude of sensors and actuators to interact with the environment. Central to these interactions are onboard computations handled by an Nvidia Jetson Orin Nano embedded computer. Some key features of this device include a microSD card slot, a 40-pin Expansion Header, 4x USB 3.2 Type A ports and a Display Port Output Connector \cite{b5}. The microSD card slot allows for Ubuntu 20.04 to be flashed onto the embedded computer through the Jetpack Software Development Kit 5 (Jetpack SDK 5). The USB Type A ports permit for sensors to be serially connected to the computer, which publish data through topics within the ROS 2 middleware. In this study, the data is manipulated within C++ nodes which are subscribed to the relevant topics. 
-
-\begin{figure}
-    \centering
-    \includegraphics[scale=0.2]{lidar_diagram.png}
-    \caption{Shows the SLAMTEK A2M8 attached on the vehicle extremity.}
-    \label{Figure 2}
-\end{figure}
-
-The sensory modules on the MacAEV consists of a SLAMTEK A2M8 RPLIDAR, Intel RealSense Depth Camera D345, Adafruit BNO055 IMU and TRAMPA VESC MARK VI. Key features of the SLAMTEK A2M8 RPLIDAR (shown in Figure 2) include the use of TTL UART to communicate with the embedded computer, a sample rate of 8 kHz, an angular resolution of \ang{0.225} and serial baud rate of 115 200 bits per second. The RPLIDAR is connected to the Nvidia Jetson through a USB type A port and publishes both the angular heading and distance of captured point clouds \cite{b6}. Using the RPLidar in ROS 2 requires the installation of SLAMTEK's \textit{rplidar-ros2} package which allows a node capable publishing data to a topic called \textit{/scan} to be initialized.
-
-\begin{figure}
-    \centering
-    \includegraphics[scale=0.25]{realsense_diagram.png}
-    \caption{Shows the Intel RealSense Depth Camera attached to the vehicle extremity.}
-    \label{Figure 3}
-\end{figure}
-
-
-The Intel RealSense Depth Camera D345 shown in Figure 3 combines both RGB and infrared stereoscopic depth cameras with an inertial measurement unit (IMU). Within the camera, the stereo-depth module captures images at 90 frames per second at a resolution of 1280 by 720 pixels, using left and right imagers. Then, data is processed by the vision processor to correct the captured image. Finally, the processed data is stored in the camera's memory through an EEPROM \cite{b7}. Using the camera in ROS 2 requires the installation of the \textit{realsense-ros} package, which enables the use of the \textit{realsense2\textunderscore camera} node. This node publishes color, depth, extrinsic and inertial measurements across eight different topics. The algorithms used for autonomous navigation in this paper rely on depth imaging. 
-% This camera is commonly used improve the environmental awareness of the MacAEV, permitting navigation in complex environments, the detection obstacles, and more efficient interactions with surroundings.
-
-\begin{figure}
-    \centering
-    \includegraphics[scale=0.2]{motor_ctrl_diagram.png}
-    \caption{Shows the TRAMPA VESC MARK VI attached on the vehicle body.}
-    \label{Figure 4}
-\end{figure}
-
-
-The VESC MKVI, shown in Figure 4, is a motor controller, which offloads the computational expense associated with the control and positioning of the Brushless DC (BLDC) motors and servos in the MacAEV. Furthermore, the built-in wheel odometry allows for estimation of the vehicle velocity, which facilitates the integration of closed-loop control systems for speed control. It is connected to the Nvidia Jetson through a USB Type A port and powered by LiPo battery. Communication between the Nvidia Jetson and the VESC is handled through ROS-based drivers. 
-\section{Optimization-Based Navigation}
-In this section, the navigation algorithm used to avoid obstacles is presented. 
+\section{Used Algorithms}
+The algorithm used for autonomous navigation follow the pipeline shown in the Figure.   
 
 \begin{figure}
     \centering
@@ -169,11 +148,15 @@ In this section, the navigation algorithm used to avoid obstacles is presented.
 
 \subsection{Calculating Heading Angle}
 
-The Lidar scans are captured as pairs $(\theta_i, r_i)$ of beam angles and corresponding range measurements. The vehicle's heading angle $\theta_{head}$ is calculated as a weighted average of the Lidar beam angles within a pre-defined field of vision:
+The LiDAR scans are captured and pre-processed as pairs $(\theta_i, r_i)$ of beam angles and corresponding range measurements. The scans are processed, assigning 
+
+The angle, $\theta_{head}$, represents the desired direction of travel of the vehicle and acts as a reference to separate returns on the left and right sides of the vehicle in any orientation. 
 
 \[\theta_{head} = \frac{\sum_{i} r_i \theta_i}{\sum_{i} r_i} \]
 
-This angle, $\theta_{head}$, representing the desired direction of travel of the vehicle, is used as a reference to separate returns on the left and right sides of the vehicle. Two design parameters $\alpha_l$ and $\beta_l$, which are angles oriented on the left of $\theta_{head}$, are chosen.  The range measurements between these two angles are sampled and used to calculate the left barrier, as described in Section B below. Similarly, on the right side, $\alpha_r$ and $\beta_r$ are chosen, and the corresponding range measurements are used to calculate the right barrier. 
+The vehicle's heading angle $\theta_{head}$ is calculated as a weighted average of the LiDAR beam angles within a pre-defined field of vision:
+
+Two design parameters $\alpha_l$ and $\beta_l$, which are angles oriented on the left of $\theta_{head}$, are chosen.  The range measurements between these two angles are sampled and used to calculate the left barrier, as described in Section B below. Similarly, on the right side, $\alpha_r$ and $\beta_r$ are chosen, and the corresponding range measurements are used to calculate the right barrier. 
 
 % As shown in Figure \ref{Figure 2}, the scans are sub-sampled between $\alpha_l$ and $\beta_l$, as well as $\alpha_r$ and $\beta_r$ which are used to form the left and right barriers respectively. The distance between the origin of the frame and the calculated walls is maximized based on these returns. 
 
@@ -283,6 +266,52 @@ The \textit{backup} state will cause the vehicle to move with the same velocity 
 
 The \textit{turn} state is also defined with the same velocity scale as in (8). If the vehicle is already oriented away from the closest obstacle, then a state shift will be triggered to return to \textit{normal}. Otherwise, the steering angle will be set to maximum and if the vehicle is still unable orient itself away from obstacles, then it will return to the \textit{backup} state.
 
+\section{System Design}
+
+
+
+
+% \subsection{Convex Model-Predictive Control}
+% The discrete linear quadratic regulator can be extended to include inequality constraints through convex model-predictive control (MPC). 
+
+In this section, the hardware architecture and technical specifications of the MacAEV are presented.
+
+\subsection{Hardware Architecture}
+
+The McMaster AEV car, powered by a VENOM 3S lithium-polymer (LiPo) Battery, is built on an ARMA GRANITE 4x4 vehicle platform and consists of a multitude of sensors and actuators to interact with the environment. Central to these interactions are onboard computations handled by an Nvidia Jetson Orin Nano embedded computer. Some key features of this device include a microSD card slot, a 40-pin Expansion Header, 4x USB 3.2 Type A ports and a Display Port Output Connector \cite{b5}. The microSD card slot allows for Ubuntu 20.04 to be flashed onto the embedded computer through the Jetpack Software Development Kit 5 (Jetpack SDK 5). The USB Type A ports permit for sensors to be serially connected to the computer, which publish data through topics within the ROS 2 middleware. In this study, the data is manipulated within C++ nodes which are subscribed to the relevant topics. 
+
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.2]{lidar_diagram.png}
+    \caption{Shows the SLAMTEK A2M8 attached on the vehicle extremity.}
+    \label{Figure 2}
+\end{figure}
+
+The sensory modules on the MacAEV consists of a SLAMTEK A2M8 RPLIDAR, Intel RealSense Depth Camera D345, Adafruit BNO055 IMU and TRAMPA VESC MARK VI. Key features of the SLAMTEK A2M8 RPLIDAR (shown in Figure 2) include the use of TTL UART to communicate with the embedded computer, a sample rate of 8 kHz, an angular resolution of \ang{0.225} and serial baud rate of 115 200 bits per second. The RPLIDAR is connected to the Nvidia Jetson through a USB type A port and publishes both the angular heading and distance of captured point clouds \cite{b6}. Using the RPLidar in ROS 2 requires the installation of SLAMTEK's \textit{rplidar-ros2} package which allows a node capable publishing data to a topic called \textit{/scan} to be initialized.
+
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.25]{realsense_diagram.png}
+    \caption{Shows the Intel RealSense Depth Camera attached to the vehicle extremity.}
+    \label{Figure 3}
+\end{figure}
+
+
+The Intel RealSense Depth Camera D345 shown in Figure 3 combines both RGB and infrared stereoscopic depth cameras with an inertial measurement unit (IMU). Within the camera, the stereo-depth module captures images at 90 frames per second at a resolution of 1280 by 720 pixels, using left and right imagers. Then, data is processed by the vision processor to correct the captured image. Finally, the processed data is stored in the camera's memory through an EEPROM \cite{b7}. Using the camera in ROS 2 requires the installation of the \textit{realsense-ros} package, which enables the use of the \textit{realsense2\textunderscore camera} node. This node publishes color, depth, extrinsic and inertial measurements across eight different topics. The algorithms used for autonomous navigation in this paper rely on depth imaging. 
+% This camera is commonly used improve the environmental awareness of the MacAEV, permitting navigation in complex environments, the detection obstacles, and more efficient interactions with surroundings.
+
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.2]{motor_ctrl_diagram.png}
+    \caption{Shows the TRAMPA VESC MARK VI attached on the vehicle body.}
+    \label{Figure 4}
+\end{figure}
+
+
+The VESC MKVI, shown in Figure 4, is a motor controller, which offloads the computational expense associated with the control and positioning of the Brushless DC (BLDC) motors and servos in the MacAEV. Furthermore, the built-in wheel odometry allows for estimation of the vehicle velocity, which facilitates the integration of closed-loop control systems for speed control. It is connected to the Nvidia Jetson through a USB Type A port and powered by LiPo battery. Communication between the Nvidia Jetson and the VESC is handled through ROS-based drivers. 
+
+\section{Software Architecture}
+
 \begin{figure}[H]
     \centering
     \includegraphics[scale=0.25]{autonomous_architecture.png}
@@ -291,7 +320,7 @@ The \textit{turn} state is also defined with the same velocity scale as in (8). 
 \end{figure}
 
 
-\section{Software Architecture}
+
 In this section, the software architecture of the MacAEV is presented, along with explanations of key algorithms used to fuse the data from the Lidar and stereo camera. 
 
 MacAEV's autonomous navigation software architecture is derived from the University of Pennsylvania's F1Tenth Simulator, an open-source vehicle platform to facilitate driving simulations through ROS. The architecture of this simulator is modified to integrate a navigation node, which publishes ackermann messages to the VESC Motor Controller node when enabled by joystick input. A diagram of the software architecture, illustrating the connections between nodes and topics can be seen in Figure \ref{Figure 3}.
