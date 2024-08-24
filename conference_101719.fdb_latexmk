@@ -1,7 +1,7 @@
 # Fdb version 3
-["pdflatex"] 1724107990 "/home/dhilan/latex_projects/a_ros_based_approach/conference_101719.tex" "conference_101719.pdf" "conference_101719" 1724107991
+["pdflatex"] 1724430039 "/home/dhilan/latex_projects/a_ros_based_approach/conference_101719.tex" "conference_101719.pdf" "conference_101719" 1724430041
   "/etc/texmf/web2c/texmf.cnf" 1723745978 475 c0e671620eb5563b2130f56340a5fde8 ""
-  "/home/dhilan/latex_projects/a_ros_based_approach/conference_101719.tex" 1724107989 47075 2edffc36601a0c572b9a1b19953ed2b0 ""
+  "/home/dhilan/latex_projects/a_ros_based_approach/conference_101719.tex" 1724430035 52337 ae6f9ec6156d97043760c0f109f1a106 ""
   "/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc" 1165713224 4850 80dc9bab7f31fb78a000ccfed0e27cab ""
   "/usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/adobe/times/ptmb7t.tfm" 1136768653 2172 fd0c924230362ff848a33632ed45dc23 ""
@@ -100,13 +100,15 @@
   "/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map" 1723750810 4379155 98693266ff65f58d9f98aff394de12d2 ""
   "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1723750856 2798823 a06c2b51c52caaba385d989edf96e531 ""
   "IEEEtran.cls" 1723779200 281957 5b2e4fa15b0f7eabb840ebf67df4c0f7 ""
-  "autonomous_architecture.png" 1723779200 80928 778e28b8a5778d83b915dbd680ccac24 ""
-  "conference_101719.aux" 1724107991 3280 445f85c1cc270f3349b04c700d4b8a6e "pdflatex"
-  "conference_101719.tex" 1724107989 47075 2edffc36601a0c572b9a1b19953ed2b0 ""
+  "IMG_0506.jpg" 1724356293 104175 070f9c3e4232031d5a3b397d00a72291 ""
+  "conference_101719.aux" 1724430041 3752 d9920e064d9604159004047600fade10 "pdflatex"
+  "conference_101719.tex" 1724430035 52337 ae6f9ec6156d97043760c0f109f1a106 ""
   "diagram.png" 1723779200 120384 5dc1e35ebbddf3920d0b116068545c7f ""
   "lidar_diagram.png" 1723779200 406515 c28cc7dc3e4f055e966fc978aae51f44 ""
   "motor_ctrl_diagram.png" 1723779200 709874 701e0ae8bf05135f00ff4ab75576ab70 ""
+  "paper_obstacle_image.png" 1724358149 935146 d6c705a4d975fc98c7ba8a81fe694db6 ""
   "realsense_diagram.png" 1723779200 393440 f6bedc221bc490a7abfd57baf190e5c8 ""
+  "rqt_graph.png" 1724272333 161267 1bb6a54ba0f697fa78bd1d794c2ae403 ""
   "vehicle.png" 1723779200 441856 4225f514cb2bc656376a9a1e7bc91f22 ""
   (generated)
   "conference_101719.aux"

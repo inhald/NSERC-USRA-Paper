@@ -14,7 +14,7 @@
     T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
 \begin{document}
 
-\title{A ROS-Based Stereo Camera and LiDAR Fusion Approach to Obstacle Detection and Avoidance for Scaled Vehicles\\
+\title{A ROS-Based Sensor Fusion Approach to Obstacle Detection and Avoidance for Scaled Vehicles\\
 % {\footnotesize \textsuperscript{*}Note: Sub-titles are not captured in Xplore and
 % should not be used}
 \thanks{This project is supported by the National Sciences and Engineering Research Council of Canada}
@@ -60,7 +60,12 @@ teeluckn@mcmaster.ca} }
 \maketitle
 
 \begin{abstract}
-In this article, the McMaster Autonomous Electrified Vehicle (MacAEV), a small-scale 1:10 RC vehicle, is used to simulate manual and autonomous driving modes. Currently, the autonomous driving algorithm solves an optimization problem using integrated data from the onboard Intel RealSense Camera and SLAMTEK A2M8 RPLidar to navigate around detected obstacles. However, this approach is highly computationally expensive, and many embedded systems cannot perform these calculations fast enough to course correct and avoid a collision. To resolve this issue, this article proposes an optimized methodology leveraging a ROS 2 (Robot Operating System) package designed for real-time performance in C++. This efficiently resolves the optimization problem and enhances obstacle avoidance capabilities for the MacAEV. 
+In this article, an approach to autonomous navigation is presented using the McMaster Autonomous Electrified Vehicle (MacAEV), a small-scale 1:10 RC vehicle equipped with low-cost sensors. The algorithm solves an optimization problem using integrated data from the onboard depth camera and 2D LiDAR to navigate around detected obstacles. Using ROS 2 middleware, the methodology was implemented and acheived real-time performance.
+
+
+
+
+% To resolve this issue, this article proposes an optimized methodology leveraging a ROS 2 (Robot Operating System) package designed for real-time performance in C++. This efficiently resolves the optimization problem and enhances obstacle avoidance capabilities for the MacAEV. 
 
 % This document is a model and instructions for \LaTeX.
 % This and the IEEEtran.cls file define the components of your paper [title, text, heads, etc.]. *CRITICAL: Do Not Use Symbols, Special Characters, Footnotes, 
@@ -73,8 +78,7 @@ In this article, the McMaster Autonomous Electrified Vehicle (MacAEV), a small-s
 \end{abstract}
 
 \begin{IEEEkeywords}
-Autonomous Vehicles, Electrified Vehicles, Data Fusion, Model Predictive Control (MPC),
-Intel RealSense Camera, SLAMTEK A2M8 RPLidar, ROS 2 (Robot Operating System), Embedded Systems,
+Autonomous Vehicles, Self-Driving, Data Fusion, Model Predictive Control (MPC), ROS 2 (Robot Operating System), Scaled Vehicles
 Computational Efficiency, Obstacle Avoidance
 \end{IEEEkeywords}
 
@@ -101,7 +105,7 @@ Autonomous driving has undergone substantial development over the past few decad
 
 %discuss levels of autonomy 
 
-For local path-planning, scaled vehicles leverage algorithms designed for obstacle avoidance, utilizing sensory modules to first detect objects followed by a control strategy to navigate around them. Light Detection and Ranging (LiDAR), an active sensor, is commonly used as a sensory module for these tasks due to the relability of its point cloud data. LiDARs are classified as either 2D or 3D: 3D LiDARs emit multiple laser beams in three dimensional space, while in contrast, 2D LiDARs produces a single beam at a time and yield a plane scanning. These advanced scanning features of 3D LiDAR scanners can be prohibitively expensive, restricting some researchers from employing scaled vehicles to the field of autonomous driving.
+For local path-planning, scaled vehicles leverage algorithms designed for obstacle avoidance, utilizing sensory modules to first detect objects followed by a control strategy to navigate around them. Light Detection and Ranging (LiDAR), an active sensor, is commonly used as a sensory module for these tasks due to the relability of its point cloud data. LiDARs are classified as either 2D or 3D: 3D LiDARs emit multiple laser beams in three dimensional space, while 2D LiDARs produces a single beam at a time and yield a plane scanning. These advanced scanning features of 3D LiDAR scanners can be prohibitively expensive, restricting some researchers from employing scaled vehicles to the field of autonomous driving.
 
 In this paper, the McMaster Autonomous Electrified Vehicle (MacAEV), a scaled vehicle designed at McMaster University (shown in Figure 1), utilizes sensor fusion to detect and avoid obstacles in real-time along a corridor. It is equipped with both a depth camera and a 2D LiDAR, which are interfaced with an embeded computer through Robot Operating System 2 (ROS 2). The data sampled by both sensors is manipulated and fused in C++, and an optimization-based control algorithm, described in Section II, is applied to avoid the detected obstacles. 
 
@@ -126,46 +130,79 @@ In this paper, the McMaster Autonomous Electrified Vehicle (MacAEV), a scaled ve
 % Examples of commonly used CNN models include Adaptive Spatial Feature Fusion (ASFF), CenterNet, EfficientDet and You Only Look Once (YOLO).
 
 The paper is structured as follows: Section II examines related work. Section III discusses the 
-algorithms used to detect obstacles and the control strategy used to navigate around them. Section IV examines the hardware components of the MacAEV and interfacing them through ROS 2. Section V discusses the implementation details of the system with specific insights into the data fusion and ground plane filtering algorithms. Section VI demonstrates the experimental results, showing sucessful obstacle detection and avoidance and Section VII concludes the paper and presents future directions. 
+algorithms used to detect obstacles and the control strategy used to navigate around them. Section IV examines the hardware components of the MacAEV and interfacing them through ROS 2. Section V discusses the implementation details of the system. Section VI demonstrates the experimental results, showing improved obstacle detection and avoidance and Section VII concludes the paper and presents future directions. 
 
 
   % Monocular vision image-based methods for small-scale cars can be further subcategorized into three types:  appearance-based, motion-based and depth-based. Appearance-based methods identify obstacles in the foreground based on visual appearance. Motion-based methods detect objects using motion vectors. Depth-based methods determine the spatial arrangement of objects by utilizing depth. 
 \section{Related Work}
-Obstacle avoidance, a basic task in self-driving, is the backbone of autonomous navigation. Approaches to this task evolved from the Bug Algorithm in favor of path planning algorithms such as A* or Dijkstra on a local cost map \cite{b1}. In recent times, strategies to this task have now adopted machine learning flavor, giving rise to the optimization-based and model predictive control algorithms.    
+Obstacle avoidance, a basic task in self-driving, is the backbone of autonomous navigation. Approaches to this task evolved from the Bug Algorithm in favor of path planning algorithms such as A* or Dijkstra on a local cost map \cite{b1}. Recently, strategies to this task have now adopted machine learning flavor, giving rise to the optimization-based and model predictive control algorithms.    
 Moreover, a critical aspect of successful obstacle avoidance hinges on accurate detection, for which a myriad of sensors can be employed to continuously scan the surroundings and identify obstacles. The most commonly used sensors for detection are LiDAR and camera, giving rise to LiDAR-based and vision-based approaches respectively \cite{b2}. 
 
 Vision-based approaches use either computer vision (CV) or machine learning, specifically Convolutional Neural Network (CNN)-based algorithms such as in \cite{b3}. In the context of small-scale autonomous driving, the primary limitation to this approach is the restricted awareness of the surroundings due to the narrow field of vision captured by the camera sampling data. On the other hand, 2D Lidar-based methods, such as the Follow the Gap Method Method described by Sezer et al. in \cite{b4}, analyze raw returns to detect obstacles. Yet, relying solely on data sampled from a single plane can lead to potential blind spots and missed obstacles. This paper overcomes the limitations of both approaches by proposing a methodology of fusing the data and improves on existing optimization-based control algorithms to navigate around the detected obstacles.
 
 \section{Used Algorithms}
-The algorithm used for autonomous navigation follow the pipeline shown in the Figure.   
+The algorithm used for autonomous navigation follows the pipeline shown in the Figure.   
 
 \begin{figure}
     \centering
     \includegraphics[scale=0.2]{diagram.png}
     \caption{Vehicle from top-view with labelled parameters used for retrieval of sensory information and control.}
-    \label{Figure 3}
+    \label{Figure 2}
 \end{figure}
+
+\subsection{Data Fusion}
+As stated, a key limitation of 2D LiDARs is their inablity to detect obstacles above and below their scanning plane. One method of addressing this issue involves the incorporation of a depth camera and a fusion of data between both sensors. This is acheived through a frame transformation of points obtained from the depth image to the LiDAR frame, then a comparison of the ranges sampled by both sensors. If the camera measures a point to be closer than its corresponding LiDAR measurement, this means the vehicle is approaching an obstacle below or above the plane of the LiDAR scans. In this case, the corresponding LiDAR scan should be replaced by the camera measurement to give accurate information about the surroundings.
+
+\RestyleAlgo{ruled}
+\begin{algorithm}
+\caption{Camera-LiDAR Data Fusion}
+        \KwData{Depth Image, LiDAR Scans}
+        \KwResult{Fused Ranges}
+
+        1. Filter out Ground Points from Depth Image\\
+        2. Transform each of remaining points to frame of LiDAR\\
+        3. If a camera point is closer than corresponding LiDAR point,   replace point in fused data \\
+
+\end{algorithm}
+
+\subsection{Ground Points Filtering}
+
+
+The strategy to fuse LiDAR and camera data is susceptible to errors, as the camera may inadvertently sample ground points due to misalignment, reflective surfaces and other camera intrinsic parameters which create noise. To mitigate this issue, a ground plane is fitted to a selection of the points within a certain threshold using the Random Sample Consensus (RANSAC) algorithm, and the remainder of the points in the image are used for the data fusion. This is described in Algorithm 2.
+
+
+\begin{algorithm}
+\caption{Ground Points Filtering}
+        \KwData{Depth Image}
+        \KwResult{Camera Ranges without Ground Points}
+
+        1. Randomly select three distinct points in lower half of image\\
+        2. Calculate plane coefficients from points\\
+        3. Iterate over each pixel, counting number of points within threshold to plane and storing it otherwise \\
+        4. Repeat plane generations until enough points have been filtered out or a maximum number of generations has been exceeded \\
+
+\end{algorithm}
 
 \subsection{Calculating Heading Angle}
 
-The LiDAR scans are captured and pre-processed as pairs $(\theta_i, r_i)$ of beam angles and corresponding range measurements. The scans are processed, assigning beam angles as increments of the LiDAR resolution with respect to the center of a predefined field of vision, namely $-\theta_{cen} \leq \theta \leq \theta_{cen}$ and ranges $0 \leq r_i \leq r_{max}$, where $r_{max}$ is the maximum LiDAR scan range. 
+The fused data is captured and pre-processed as pairs $(\theta_i, r_i)$ of beam angles and corresponding range measurements. These scans are processed, assigning beam angles as increments of the LiDAR resolution with respect to the center of a predefined field of vision. This falls within the bound $-\theta_{cen} \leq \theta \leq \theta_{cen}$.  Ranges are adjusted to fit the bound $0 \leq r_i \leq r_{max}$, where $r_{max}$ is the maximum LiDAR scan range. This eliminates erroneous data.
 
-The heading angle, $\theta_{head}$, represents the desired direction of travel of the vehicle and acts as a reference to separate scans on the left and right sides of the vehicle in any orientation. It is calculated as a weighted average of beam angles based on the processed data:
+The heading angle, $\theta_{head}$, represents the intended direction of travel of the vehicle and acts as a reference to separate scans on the left and right sides of the vehicle in any orientation. It is calculated as a weighted average of beam angles based on the processed data:
 
 \[\theta_{head} = \frac{\sum_{i} r_i \theta_i}{\sum_{i} r_i} \]
 
-Two design parameters $\alpha_l$ and $\beta_l$, which are angles oriented on the left of $\theta_{head}$, are chosen.  The range measurements between these two angles are sampled and used to calculate the left barrier, as described in Section B below. Similarly, on the right side, $\alpha_r$ and $\beta_r$ are chosen, and the corresponding range measurements are used to calculate the right barrier. 
+Two design parameters $\alpha_l$ and $\beta_l$, which are angles oriented on the left of $\theta_{head}$, are chosen.  The range measurements between these two angles are sampled and used to calculate the left barrier, as described in subsection D below. Similarly, on the right side, $\alpha_r$ and $\beta_r$ are chosen, and the corresponding range measurements are used to calculate the right barrier. 
 
 % As shown in Figure \ref{Figure 2}, the scans are sub-sampled between $\alpha_l$ and $\beta_l$, as well as $\alpha_r$ and $\beta_r$ which are used to form the left and right barriers respectively. The distance between the origin of the frame and the calculated walls is maximized based on these returns. 
 
 \subsection{Finding the Barriers}
-Suppose $w \in \Re^2$  is the vector which parametrizes the line separating the Lidar scans from the vehicle. The minimum distance, $d$, between the origin of the frame, centered at the Lidar, and the line is given by:
+Suppose $w \in \Re^2$  is the vector which parametrizes the line separating the scans from the vehicle. The minimum distance, $d$, between the origin of the frame, centered at the LiDAR, and the line is given by:
 
 \begin{align}
     d = \frac{1}{w^T w} \notag
 \end{align}
 
-The lines on both sides of the vehicle are constrained to be parallel, to better fit the barriers. The goal is to find a vector $w$ which maximizes the total distance $d_{total}$, representing the total distance from the frame to the left barrier $d_l$ and frame to the right barrier $d_l$. 
+The lines on both sides of the vehicle are constrained to be parallel, which better fits the walls of the corridor and smoothen turns around corners. The goal is to find a vector $w$ which maximizes the total distance $d_{total}$, representing the total distance from the frame to the left barrier $d_l$ and frame to the right barrier $d_l$. 
 
 \begin{align}
     d_{total} = d_l + d_r = \frac{2}{w^T w} \notag
@@ -186,10 +223,9 @@ This gives rise to a convex model predictive control problem with linear constra
 
 where $n_r$ and $n_l$ are the number of points sampled between $\alpha_r$ and $\beta_r$ and $\alpha_l$ and $\beta_l$ respectively. $b$ is a parameter representing the translation of the lines and $\epsilon > 0$.
 
-The quadratic program is implemented in C++ by augmenting the vector $w$ with $b$ as a third component. This is accomplished by assigning a very small weight to $b$ in the positive semi-definite matrix $Q$ in $w^T Q w$, which represents the cost function $J$. The constraints are represented as linear combinations of $w_x, w_y$ and $b$, which are easily expressible in matrix form. Therefore, the dimension of the quadratic program is $n=3$, indicating it is  small-sized and can be feasibly solved on many embedded computers in real time. In the C++ implementation on the MacAEV, the Dual-Active Set Method proposed by Goldfarb and Idnani in \cite{b8} was used to compute the solution to the optimization problem, which demonstrated good real time performance. 
-%%talk about what the solution to the program gives
+% The quadratic program is implemented in C++ by augmenting the vector $w$ with $b$ as a third component. This is accomplished by assigning a very small weight to $b$ in the positive semi-definite matrix $Q$ in $w^T Q w$, which represents the cost function $J$. The constraints are represented as linear combinations of $w_x, w_y$ and $b$, which are easily expressible in matrix form. Therefore, the dimension of the quadratic program is $n=3$, indicating it is  small-sized and can be feasibly solved on many embedded computers in real time. In the C++ implementation on the MacAEV, the Dual-Active Set Method proposed by Goldfarb and Idnani in \cite{b8} was used to compute the solution to the optimization problem, which demonstrated good real time performance. 
 
-%kinda bad
+
 % In practice, solving this problem using a quadratic program solver requires defining vector $u = [x,y,b]$ and tailoring it further to the solver's required form. It can be shown that $w_l = \frac{u}{b+1}$ and $w_r = \frac{u}{b-1}$, which is a helpful result in the implementation. 
 
 \subsection{Steering and Velocity Controller}
@@ -264,64 +300,81 @@ The \textit{backup} state will cause the vehicle to move with the same velocity 
 
 The \textit{turn} state is also defined with the same velocity scale as in (8). If the vehicle is already oriented away from the closest obstacle, then a state shift will be triggered to return to \textit{normal}. Otherwise, the steering angle will be set to maximum and if the vehicle is still unable orient itself away from obstacles, then it will return to the \textit{backup} state.
 
-\section{System Design}
+\section{System Design and ROS Integration}
 
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.15]{motor_ctrl_diagram.png}
+    \caption{Shows the TRAMPA VESC MARK VI attached on the vehicle body.}
+    \label{Figure 5}
+\end{figure}
 
 
 
 % \subsection{Convex Model-Predictive Control}
 % The discrete linear quadratic regulator can be extended to include inequality constraints through convex model-predictive control (MPC). 
 
-In this section, the hardware architecture and technical specifications of the MacAEV are presented.
+In this section, the hardware architecture of the MacAEV and ROS interfacing is discussed.  
 
-\subsection{Hardware Architecture}
+The McMaster AEV car, powered by a VENOM 3S lithium-polymer (LiPo) Battery, is built on an ARMA GRANITE 4x4 vehicle platform and consists of a multitude of sensors and actuators to interact with the environment. These components are connected to an Nvidia Jetson Orin Nano embedded computer, running Ubuntu 20.04 with ROS Foxy middleware.
 
-The McMaster AEV car, powered by a VENOM 3S lithium-polymer (LiPo) Battery, is built on an ARMA GRANITE 4x4 vehicle platform and consists of a multitude of sensors and actuators to interact with the environment. Central to these interactions are onboard computations handled by an Nvidia Jetson Orin Nano embedded computer. Some key features of this device include a microSD card slot, a 40-pin Expansion Header, 4x USB 3.2 Type A ports and a Display Port Output Connector \cite{b5}. The microSD card slot allows for Ubuntu 20.04 to be flashed onto the embedded computer through the Jetpack Software Development Kit 5 (Jetpack SDK 5). The USB Type A ports permit for sensors to be serially connected to the computer, which publish data through topics within the ROS 2 middleware. In this study, the data is manipulated within C++ nodes which are subscribed to the relevant topics. 
+The system inputs are:
+\begin{itemize}
+    \item \textbf{SLAMTEK A2M8 RPLIDAR} (Figure 3): Communicates with UART, a sampling rate of 8 kHz, angular resolution of \ang{0.225}, serial baudrate of 115200 bits per second \cite{b6}.
+    \item \textbf{Intel RealSense Depth Camera D345} (Figure 4): Captures images at 90 fps, resolution of 1280 x 720, uses internal vision processor to correct image captured by left and right imagers \cite{b7}.
+\end{itemize}
+
+The system outputs are:
+
+\begin{itemize}
+    \item \textbf{TRAMPA VESC MKVI} (Figure 5): Motor driver responsible for controlling Brushless DC (BL DC) motors and servos. Built-in wheel odometry, yielding velocity and orientation of vehicle.
+\end{itemize} 
+
+The sensory modules and motor driver interface with the embedded computer through ROS-based drivers. As shown in Figure 6, data obtained from the inputs is published through specific topics, namely, LiDAR scans and camera images are published to the \textbf{/scan2} and \textbf{/camera/depth/image\textunderscore rect\textunderscore raw} topics respectively. To make the LiDAR data easier to manipulate for navigation, it is passed through the \textbf{experiment} node and republished through the \textbf{/scan} topic. 
+
+The node responsible for obstacle avoidance is \textbf{navigation}. It is subscribed to \textbf{/scan}, \textbf{/odom}, \textbf{/camera/depth/camera\textunderscore info} and \textbf{/camera/depth/image\textunderscore rect\textunderscore raw}. Using the described algorithm, it publishes ackermann msgs, meaning both a velocity and steering angle, to the \textbf{/drive} topic. The \textbf{ackermann\textunderscore mux} node is subscribed to this topic, which publishes these commands to the \textbf{/command/motor/speed} and \textbf{/command/servo/position} topic when the vehicle is in autonomous navigation mode. These topics are directly modify motor speed and servo position. 
+
+% Central to these interactions are onboard computations handled by an Nvidia Jetson Orin Nano embedded computer. Some key features of this device include a microSD card slot, a 40-pin Expansion Header, 4x USB 3.2 Type A ports and a Display Port Output Connector \cite{b5}. The microSD card slot allows for Ubuntu 20.04 to be flashed onto the embedded computer through the Jetpack Software Development Kit 5 (Jetpack SDK 5). The USB Type A ports permit for sensors to be serially connected to the computer, which publish data through topics within the ROS 2 middleware. In this study, the data is manipulated within C++ nodes which are subscribed to the relevant topics. 
 
 \begin{figure}
     \centering
-    \includegraphics[scale=0.2]{lidar_diagram.png}
+    \includegraphics[scale=0.18]{lidar_diagram.png}
     \caption{Shows the SLAMTEK A2M8 attached on the vehicle extremity.}
-    \label{Figure 2}
+    \label{Figure 3}
 \end{figure}
 
-The sensory modules on the MacAEV consists of a SLAMTEK A2M8 RPLIDAR, Intel RealSense Depth Camera D345, Adafruit BNO055 IMU and TRAMPA VESC MARK VI. Key features of the SLAMTEK A2M8 RPLIDAR (shown in Figure 2) include the use of TTL UART to communicate with the embedded computer, a sample rate of 8 kHz, an angular resolution of \ang{0.225} and serial baud rate of 115 200 bits per second. The RPLIDAR is connected to the Nvidia Jetson through a USB type A port and publishes both the angular heading and distance of captured point clouds \cite{b6}. Using the RPLidar in ROS 2 requires the installation of SLAMTEK's \textit{rplidar-ros2} package which allows a node capable publishing data to a topic called \textit{/scan} to be initialized.
+% The sensory modules on the MacAEV consists of a SLAMTEK A2M8 RPLIDAR, Intel RealSense Depth Camera D345, Adafruit BNO055 IMU and TRAMPA VESC MARK VI. Key features of the SLAMTEK A2M8 RPLIDAR (shown in Figure 2) include the use of TTL UART to communicate with the embedded computer, a sample rate of 8 kHz, an angular resolution of \ang{0.225} and serial baud rate of 115 200 bits per second. The RPLIDAR is connected to the Nvidia Jetson through a USB type A port and publishes both the angular heading and distance of captured point clouds \cite{b6}. Using the RPLidar in ROS 2 requires the installation of SLAMTEK's \textit{rplidar-ros2} package which allows a node capable publishing data to a topic called \textit{/scan} to be initialized.
 
 \begin{figure}
     \centering
     \includegraphics[scale=0.25]{realsense_diagram.png}
     \caption{Shows the Intel RealSense Depth Camera attached to the vehicle extremity.}
-    \label{Figure 3}
-\end{figure}
-
-
-The Intel RealSense Depth Camera D345 shown in Figure 3 combines both RGB and infrared stereoscopic depth cameras with an inertial measurement unit (IMU). Within the camera, the stereo-depth module captures images at 90 frames per second at a resolution of 1280 by 720 pixels, using left and right imagers. Then, data is processed by the vision processor to correct the captured image. Finally, the processed data is stored in the camera's memory through an EEPROM \cite{b7}. Using the camera in ROS 2 requires the installation of the \textit{realsense-ros} package, which enables the use of the \textit{realsense2\textunderscore camera} node. This node publishes color, depth, extrinsic and inertial measurements across eight different topics. The algorithms used for autonomous navigation in this paper rely on depth imaging. 
-% This camera is commonly used improve the environmental awareness of the MacAEV, permitting navigation in complex environments, the detection obstacles, and more efficient interactions with surroundings.
-
-\begin{figure}
-    \centering
-    \includegraphics[scale=0.2]{motor_ctrl_diagram.png}
-    \caption{Shows the TRAMPA VESC MARK VI attached on the vehicle body.}
     \label{Figure 4}
 \end{figure}
 
 
-The VESC MKVI, shown in Figure 4, is a motor controller, which offloads the computational expense associated with the control and positioning of the Brushless DC (BLDC) motors and servos in the MacAEV. Furthermore, the built-in wheel odometry allows for estimation of the vehicle velocity, which facilitates the integration of closed-loop control systems for speed control. It is connected to the Nvidia Jetson through a USB Type A port and powered by LiPo battery. Communication between the Nvidia Jetson and the VESC is handled through ROS-based drivers. 
+% The Intel RealSense Depth Camera D345 shown in Figure 3 combines both RGB and infrared stereoscopic depth cameras with an inertial measurement unit (IMU). Within the camera, the stereo-depth module captures images at 90 frames per second at a resolution of 1280 by 720 pixels, using left and right imagers. Then, data is processed by the vision processor to correct the captured image. Finally, the processed data is stored in the camera's memory through an EEPROM \cite{b7}. Using the camera in ROS 2 requires the installation of the \textit{realsense-ros} package, which enables the use of the \textit{realsense2\textunderscore camera} node. This node publishes color, depth, extrinsic and inertial measurements across eight different topics. The algorithms used for autonomous navigation in this paper rely on depth imaging. 
+% This camera is commonly used improve the environmental awareness of the MacAEV, permitting navigation in complex environments, the detection obstacles, and more efficient interactions with surroundings.
 
-\section{Software Architecture}
 
-\begin{figure}[H]
+
+
+% The VESC MKVI, shown in Figure 4, is a motor driver, which offloads the computational expense associated with the control and positioning of the Brushless DC (BLDC) motors and servos in the MacAEV. Furthermore, the built-in wheel odometry allows for estimation of the vehicle velocity, which facilitates the integration of closed-loop control systems for speed control. It is connected to the Nvidia Jetson through a USB Type A port and powered by LiPo battery. Communication between the Nvidia Jetson and the VESC is handled through ROS-based drivers. 
+
+% \section{Software Architecture}
+
+\begin{figure*}
     \centering
-    \includegraphics[scale=0.25]{autonomous_architecture.png}
-    \caption{Shows software architecture for autonomous navigation in the package.}
-    \label{Figure 3}
-\end{figure}
+    \includegraphics[width=\textwidth]{rqt_graph.png}
+    \caption{Shows ROS software architecture of the system, produced by rqt. Nodes are depicted by ovals, while topics are boxed. This architecture is modified from University Pennsylvania's F1Tenth system.}
+    \label{Figure 6}
+\end{figure*}
 
 
 
-In this section, the software architecture of the MacAEV is presented, along with explanations of key algorithms used to fuse the data from the Lidar and stereo camera. 
+% In this section, the software architecture of the MacAEV is presented, along with explanations of key algorithms used to fuse the data from the Lidar and stereo camera. 
 
-MacAEV's autonomous navigation software architecture is derived from the University of Pennsylvania's F1Tenth Simulator, an open-source vehicle platform to facilitate driving simulations through ROS. The architecture of this simulator is modified to integrate a navigation node, which publishes ackermann messages to the VESC Motor Controller node when enabled by joystick input. A diagram of the software architecture, illustrating the connections between nodes and topics can be seen in Figure \ref{Figure 3}.
+% MacAEV's autonomous navigation software architecture is derived from the University of Pennsylvania's F1Tenth Simulator, an open-source vehicle platform to facilitate driving simulations through ROS. The architecture of this simulator is modified to integrate a navigation node, which publishes ackermann messages to the VESC Motor Controller node when enabled by joystick input. A diagram of the software architecture, illustrating the connections between nodes and topics can be seen in Figure \ref{Figure 3}.
 
 
 
@@ -333,10 +386,8 @@ MacAEV's autonomous navigation software architecture is derived from the Univers
 % This package is a CMake-based and follows the following file structure:
 
 
-\subsection{Data Fusion}
+% \subsection{Data Fusion}
 % 2-D Lidars provide an affordable means of detecting obstacles in the surroundings of the vehicle by mechanically rotating at a high rate and sampling points even faster. 
-
-A key limitation of 2D Lidars is their inablity to detect obstacles below or above their scanning plane. One method of addressing this issue involves the incorporation of a stereo depth camera, and fusing the resulting data obtained from both sensors. This is done through a frame transformation, from the camera's frame of reference to the frame of the Lidar, then comparing the relative distances sampled by both sensors. If the camera depth measurement is less than the Lidar measurement, it indicates that the vehicle is approaching an obstacle below or above the plane of the Lidar scans. In this case, the corresponding lidar scan should be replaced by the camera depth measurement, and the fused ranges are passed in matrix form to the Dual Active Set algorithm. 
 
 
 
@@ -344,20 +395,20 @@ A key limitation of 2D Lidars is their inablity to detect obstacles below or abo
 
 
 
-\subsection{Ground Plane Fitting}
+% \subsection{Ground Plane Fitting}
 % Fusing data obtained from the camera depth and lidar scan returns is done through a comparison of the measurements within the same field of vision. If the camera depth measurement is less than the lidar measurement, it indicates that the vehicle is approaching an obstacle below the plane of the lidar scans.
 
 
 % Consequently, a replacement is performed before generating the matrices used to solve for the barriers with the data. 
-The strategy to fuse lidar and camera data is susceptible to errors, as the camera may inadvertently sample ground points due to misalignment, reflective surfaces and other camera intrinsic parameters which create noise. To mitigate this issue, a ground plane is fitted to a selection of the points within a certain threshold using the Random Sample Consensus (RANSAC) algorithm shown in Algorithm 1. This approach leverages the relatively low height of the MacAEV's camera, as the dominant plane in the image will always be the ground. 
+%  This approach leverages the relatively low height of the MacAEV's camera, as the dominant plane in the image will always be the ground. 
 
 %define variables, explain that hyperparameters must be tuned
 %mention that plane filtering must be applied in conjunction with a bandpass filter to eliminate noise for best results
 
 %orientation of camera frame and why
-Each iteration of Algorithm 1 samples three valid distinct random points and the coefficients $a,b,c,d$ with $ax + by + cz + d = 0$ satisfying the points are stored. The number of points which satisfy the plane, $num$\textunderscore $pts$ is then compared to $num$\textunderscore $pts$\textunderscore $best$ and the best plane is appropriately updated. This process repeats until either a maximum number of generations $max$\textunderscore $gens$ is reached or $num$\textunderscore $pts$\textunderscore $best$ exceeds a desired number of points which fit the plane, $min$\textunderscore $fit$. 
+% Each iteration of Algorithm 1 samples three valid distinct random points and the coefficients $a,b,c,d$ with $ax + by + cz + d = 0$ satisfying the points are stored. The number of points which satisfy the plane, $num$\textunderscore $pts$ is then compared to $num$\textunderscore $pts$\textunderscore $best$ and the best plane is appropriately updated. This process repeats until either a maximum number of generations $max$\textunderscore $gens$ is reached or $num$\textunderscore $pts$\textunderscore $best$ exceeds a desired number of points which fit the plane, $min$\textunderscore $fit$. 
 
-At each time step, the plane is updated by calling the algorithm and points fitting the plane are omitted from the previously described fusion process. For best results, the hyperparameters $max$\textunderscore $gens$, $min$\textunderscore $fit$, $threshold$ and $height$ require tuning. 
+% At each time step, the plane is updated by calling the algorithm and points fitting the plane are omitted from the previously described fusion process. For best results, the hyperparameters $max$\textunderscore $gens$, $min$\textunderscore $fit$, $threshold$ and $height$ require tuning. 
 
 
 
@@ -368,10 +419,38 @@ At each time step, the plane is updated by calling the algorithm and points fitt
 % An important remark is that the frame of the depth camera is oriented with increasing y-axis towards the ground, with measurements returned in meters. 
 
 
-\section{Results (Work In Progress)}
+\section{Experimental Results}
+To evaluate the approach, an experiment was carried out in the corridor using boxes of the types shown in Figure 7. For simplicity, they will be referred to as either Type I or II boxes, based on their detectability by the sensory modules.
+
+As seen in Figure 8, the obstacles are placed along the corridor in the order Type I, Type II, Type II, Type I. These obstacles will be referred to as obstacle I, II, III and IV respectively. Each trial begins with the car placed at the start point where autonomous navigation is activated. Then, The car is observed in both the real-world and within the rqt environment, allowing real-time monitoring of both detection and avoidance. The trial ends once the car avoids each of the obstacles in reverse order and returns to the start point. 
+
+Ten trials of the experiment were performed without fusing the sensor data. Obstacles which had been displaced by collisions during the initial approach were excluded on return from the final results. The same process was repeated with the car navigating autonomously using fused sensor data.
+
+Using only LiDAR data, obstacle I and IV were never detected while obstacle II and III were sucessfully detected in all of the trials. Using the data fusion pipeline, obstacle I, II, III and IV were detected in 95\%, 100\%, 100\% and 94.1\%  of trials respectively. Furthermore, using only LiDAR data, the avoidance rates for obstacles I, II, III and IV were 0\%, 95\%, 100\% and 0\% respectively. On the other hand, using the data fusion pipeline, the avoidance rates for obstacles I, II, III and IV were 95\%, 95\%, 100\% and 76.5\% respectively. This indicates a clear improvement in both detection and avoidance using the data fusion pipeline. 
+
+
+
+
+
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.2]{paper_obstacle_image.png}
+    \caption{Obstacles used to evaluate detection and avoidance. a) Type I obstacle that is only detectable by camera. b) Type II obstacle that is detectable by both LiDAR and camera.}
+    \label{Figure 7}
+\end{figure}
+
+
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.3]{IMG_0506.jpg}
+    \caption{Corridor used for experimental trials.}
+    \label{Figure 8}
+\end{figure}
+
+
 
 \section{Conclusions and Future Work}
-In this article, a data fusion approach to obstacle detection was proposed for the MacAEV, combining measurements obtained from a 2D Lidar and a stereo depth camera. The inherent noise present in the depth camera measurements required additional filtering, which motivated the described RANSAC ground plane approximation algorithm. Using the fused and filtered measurements, an optimization problem was solved, yielding the vectors parametrizing the lines separating obstacles from the vehicle on both sides. These vectors were used in a finite state machine controller to facilitate autonomous navigation. The approach, implemented in C++, worked in real-time as demonstrated by the results.
+In this article, a data fusion approach to obstacle detection was proposed for the MacAEV, combining measurements obtained from a 2D LiDAR and a stereo depth camera. The inherent noise present in the depth camera measurements required additional filtering, which motivated the described RANSAC ground plane approximation algorithm. Using the fused and filtered measurements, an optimization problem was solved, yielding the vectors parametrizing the lines separating obstacles from the vehicle on both sides. These vectors were used in a finite state machine controller to facilitate autonomous navigation. The approach, implemented in C++, worked in real-time as demonstrated by the results.
 
 
 Overall, this strategy to local planning represents a proposed alternative to laser depth scanning, promising substantial cost savings for both researchers and partners when prototyping self-driving algorithms. Future work will focus on improving both the software and hardware architecture of the system, testing performance in more complex scenarios and feasibility studies of the approach.   
@@ -553,61 +632,61 @@ Overall, this strategy to local planning represents a proposed alternative to la
 % quantities and units. For example, write ``Temperature (K)'', not 
 % ``Temperature/K''.
 
-\RestyleAlgo{ruled}
+% \RestyleAlgo{ruled}
 
-\begin{algorithm}
-    \caption{RANSAC Ground Plane Estimation}
-        \KwData{Image in OpenCV Format}
-        \KwResult{Coefficients $a,b,c,d$ for best fit plane}
+% \begin{algorithm}
+%     \caption{RANSAC Ground Plane Estimation}
+%         \KwData{Image in OpenCV Format}
+%         \KwResult{Coefficients $a,b,c,d$ for best fit plane}
     
 
-        gens $\gets 0$\;
-        num\textunderscore pts $\gets 0$\;
-        max\textunderscore gens $\gets 20$\;
-        min\textunderscore fit $\gets 1000$\;
-        num\textunderscore pts\textunderscore best $\gets 0$\;
-        \While{gens $\leq$ max\textunderscore gens or num\textunderscore pts \textunderscore best $\leq$ min\textunderscore fit} {
-            Sample 3 distinct random points in the lower half of image\;
-            Compute $a,b,c,d$ for plane containing all three points\;
+%         gens $\gets 0$\;
+%         num\textunderscore pts $\gets 0$\;
+%         max\textunderscore gens $\gets 20$\;
+%         min\textunderscore fit $\gets 1000$\;
+%         num\textunderscore pts\textunderscore best $\gets 0$\;
+%         \While{gens $\leq$ max\textunderscore gens or num\textunderscore pts \textunderscore best $\leq$ min\textunderscore fit} {
+%             Sample 3 distinct random points in the lower half of image\;
+%             Compute $a,b,c,d$ for plane containing all three points\;
 
-            \For{row = $0 \dots$ cv\textunderscore sample\textunderscore rows}{
+%             \For{row = $0 \dots$ cv\textunderscore sample\textunderscore rows}{
 
-                \For{col = $0 \dots$ cv\textunderscore sample\textunderscore cols}{
-                    \If{$(row,col)$ has been sampled to form plane} {
-                        continue\;
-                    }
+%                 \For{col = $0 \dots$ cv\textunderscore sample\textunderscore cols}{
+%                     \If{$(row,col)$ has been sampled to form plane} {
+%                         continue\;
+%                     }
                     
-                    Deproject pixel at $(row,col)$ using camera instrinsics to find coordinates $x,y,z$\;
+%                     Deproject pixel at $(row,col)$ using camera instrinsics to find coordinates $x,y,z$\;
 
-                    Compute distance between point and plane\;
+%                     Compute distance between point and plane\;
                     
-                    \If{distance $\leq$ threshold and $y \geq$ height}{ 
-                        num\textunderscore pts $\gets$ num\textunderscore pts + 1\;
+%                     \If{distance $\leq$ threshold and $y \geq$ height}{ 
+%                         num\textunderscore pts $\gets$ num\textunderscore pts + 1\;
                     
-                    }
+%                     }
                     
                     
                 
-                }
+%                 }
 
             
-            }
+%             }
 
-            \If{num\textunderscore pts $\geq$ num\textunderscore pts\textunderscore best}{
-                a\textunderscore best $\gets$ a\;
-                b\textunderscore best $\gets$ b\;
-                c\textunderscore best $\gets$ c\;
-                d\textunderscore best $\gets $ d\;
-                num\textunderscore pts\textunderscore best $\gets$ num\textunderscore pts\;
-            }
-            gens $\gets$ gens + 1\;
+%             \If{num\textunderscore pts $\geq$ num\textunderscore pts\textunderscore best}{
+%                 a\textunderscore best $\gets$ a\;
+%                 b\textunderscore best $\gets$ b\;
+%                 c\textunderscore best $\gets$ c\;
+%                 d\textunderscore best $\gets $ d\;
+%                 num\textunderscore pts\textunderscore best $\gets$ num\textunderscore pts\;
+%             }
+%             gens $\gets$ gens + 1\;
             
             
 
             
 
-        }
-\end{algorithm}
+%         }
+% \end{algorithm}
 
 
 
