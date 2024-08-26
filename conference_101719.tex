@@ -60,7 +60,7 @@ teeluckn@mcmaster.ca} }
 \maketitle
 
 \begin{abstract}
-In this article, an approach to autonomous navigation is presented using the McMaster Autonomous Electrified Vehicle (MacAEV), a small-scale 1:10 RC vehicle equipped with low-cost sensors. The algorithm solves an optimization problem using integrated data from the onboard depth camera and 2D LiDAR to navigate around detected obstacles. Using ROS 2 middleware, the methodology was implemented and acheived real-time performance.
+In this article, an approach to autonomous navigation is presented and implemented on the McMaster Autonomous Electrified Vehicle (MacAEV), a small-scale 1:10 RC vehicle equipped with low-cost sensors. First, data captured from the onboard sensors is passed through a fusion pipeline to deduce accurate information about the vehicle's surroundings. Then, using the both the solution to an optimization problem and a state machine, the vehicle is controlled to behave with enhanced situtational awareness. Using ROS 2 middleware, this methodology was implemented and acheived real-time performance, promising reduced costs to researchers seeking to contribute to the field of autonomous driving. 
 
 
 
@@ -130,7 +130,7 @@ In this paper, the McMaster Autonomous Electrified Vehicle (MacAEV), a scaled ve
 % Examples of commonly used CNN models include Adaptive Spatial Feature Fusion (ASFF), CenterNet, EfficientDet and You Only Look Once (YOLO).
 
 The paper is structured as follows: Section II examines related work. Section III discusses the 
-algorithms used to detect obstacles and the control strategy used to navigate around them. Section IV examines the hardware components of the MacAEV and interfacing them through ROS 2. Section V discusses the implementation details of the system. Section VI demonstrates the experimental results, showing improved obstacle detection and avoidance and Section VII concludes the paper and presents future directions. 
+algorithms used to detect obstacles and the control strategy used to navigate around them. Section IV examines the hardware components of the MacAEV and interfacing them through ROS 2. Section V demonstrates the experimental results, showing improved obstacle detection and avoidance and Section VI concludes the paper and presents future directions. 
 
 
   % Monocular vision image-based methods for small-scale cars can be further subcategorized into three types:  appearance-based, motion-based and depth-based. Appearance-based methods identify obstacles in the foreground based on visual appearance. Motion-based methods detect objects using motion vectors. Depth-based methods determine the spatial arrangement of objects by utilizing depth. 
@@ -151,7 +151,7 @@ The algorithm used for autonomous navigation follows the pipeline shown in the F
 \end{figure}
 
 \subsection{Data Fusion}
-As stated, a key limitation of 2D LiDARs is their inablity to detect obstacles above and below their scanning plane. One method of addressing this issue involves the incorporation of a depth camera and a fusion of data between both sensors. This is acheived through a frame transformation of points obtained from the depth image to the LiDAR frame, then a comparison of the ranges sampled by both sensors. If the camera measures a point to be closer than its corresponding LiDAR measurement, this means the vehicle is approaching an obstacle below or above the plane of the LiDAR scans. In this case, the corresponding LiDAR scan should be replaced by the camera measurement to give accurate information about the surroundings.
+As stated, a key limitation of 2D LiDARs is their inablity to detect obstacles above and below their scanning plane. One method of addressing this issue involves the incorporation of a depth camera and a fusion of data between both sensors. This is acheived through a frame transformation of points obtained from the depth image to the LiDAR frame, then a comparison of the ranges sampled by both sensors. If the camera measures a point to be closer than its corresponding LiDAR measurement, this means the vehicle is approaching an obstacle below or above the plane of the LiDAR scans. In this case, the corresponding LiDAR scan should be replaced by the camera measurement to give accurate information about the surroundings. This is described in Algorithm 1.
 
 \RestyleAlgo{ruled}
 \begin{algorithm}
@@ -332,7 +332,7 @@ The system outputs are:
 
 The sensory modules and motor driver interface with the embedded computer through ROS-based drivers. As shown in Figure 6, data obtained from the inputs is published through specific topics, namely, LiDAR scans and camera images are published to the \textbf{/scan2} and \textbf{/camera/depth/image\textunderscore rect\textunderscore raw} topics respectively. To make the LiDAR data easier to manipulate for navigation, it is passed through the \textbf{experiment} node and republished through the \textbf{/scan} topic. 
 
-The node responsible for obstacle avoidance is \textbf{navigation}. It is subscribed to \textbf{/scan}, \textbf{/odom}, \textbf{/camera/depth/camera\textunderscore info} and \textbf{/camera/depth/image\textunderscore rect\textunderscore raw}. Using the described algorithm, it publishes ackermann msgs, meaning both a velocity and steering angle, to the \textbf{/drive} topic. The \textbf{ackermann\textunderscore mux} node is subscribed to this topic, which publishes these commands to the \textbf{/command/motor/speed} and \textbf{/command/servo/position} topic when the vehicle is in autonomous navigation mode. These topics are directly modify motor speed and servo position. 
+The node responsible for obstacle avoidance is \textbf{navigation}. It is subscribed to \textbf{/scan}, \textbf{/odom}, \textbf{/camera/depth/camera\textunderscore info} and \textbf{/camera/depth/image\textunderscore rect\textunderscore raw}. Using the described algorithm, it publishes ackermann msgs, meaning both a velocity and steering angle, to the \textbf{/drive} topic. The \textbf{ackermann\textunderscore mux} node is subscribed to this topic, which publishes these commands to the \textbf{/command/motor/speed} and \textbf{/command/servo/position} topic when the vehicle is in autonomous navigation mode. These topics directly modify motor speed and servo position. 
 
 % Central to these interactions are onboard computations handled by an Nvidia Jetson Orin Nano embedded computer. Some key features of this device include a microSD card slot, a 40-pin Expansion Header, 4x USB 3.2 Type A ports and a Display Port Output Connector \cite{b5}. The microSD card slot allows for Ubuntu 20.04 to be flashed onto the embedded computer through the Jetpack Software Development Kit 5 (Jetpack SDK 5). The USB Type A ports permit for sensors to be serially connected to the computer, which publish data through topics within the ROS 2 middleware. In this study, the data is manipulated within C++ nodes which are subscribed to the relevant topics. 
 
@@ -426,7 +426,7 @@ As seen in Figure 8, the obstacles are placed along the corridor in the order Ty
 
 Ten trials of the experiment were performed without fusing the sensor data. Obstacles which had been displaced by collisions during the initial approach were excluded on return from the final results. The same process was repeated with the car navigating autonomously using fused sensor data.
 
-Using only LiDAR data, obstacle I and IV were never detected while obstacle II and III were sucessfully detected in all of the trials. Using the data fusion pipeline, obstacle I, II, III and IV were detected in 95\%, 100\%, 100\% and 94.1\%  of trials respectively. Furthermore, using only LiDAR data, the avoidance rates for obstacles I, II, III and IV were 0\%, 95\%, 100\% and 0\% respectively. On the other hand, using the data fusion pipeline, the avoidance rates for obstacles I, II, III and IV were 95\%, 95\%, 100\% and 76.5\% respectively. This indicates a clear improvement in both detection and avoidance using the data fusion pipeline. 
+Using only LiDAR data, obstacle I and IV were never detected while obstacle II and III were sucessfully detected in all of the trials. Using the data fusion pipeline, obstacle I, II, III and IV were detected in 95\%, 100\%, 100\% and 94.1\%  of trials respectively. Furthermore, using only LiDAR data, the avoidance rates for obstacles I, II, III and IV were 0\%, 95\%, 100\% and 0\% respectively. On the other hand, using the data fusion pipeline, the avoidance rates for obstacles I, II, III and IV were 95\%, 95\%, 100\% and 94.1\% respectively. This indicates a clear improvement in both detection and avoidance using the data fusion pipeline. 
 
 
 
@@ -450,10 +450,16 @@ Using only LiDAR data, obstacle I and IV were never detected while obstacle II a
 
 
 \section{Conclusions and Future Work}
-In this article, a data fusion approach to obstacle detection was proposed for the MacAEV, combining measurements obtained from a 2D LiDAR and a stereo depth camera. The inherent noise present in the depth camera measurements required additional filtering, which motivated the described RANSAC ground plane approximation algorithm. Using the fused and filtered measurements, an optimization problem was solved, yielding the vectors parametrizing the lines separating obstacles from the vehicle on both sides. These vectors were used in a finite state machine controller to facilitate autonomous navigation. The approach, implemented in C++, worked in real-time as demonstrated by the results.
+In this article, a data fusion approach to obstacle detection was proposed, combining measurements obtained from a 2D LiDAR and depth camera. This process involved fusing the data through a filtering and replacement algorithm using an application of RANSAC, which yielded more accurate information about the small-scale vehicle's surroudings. An avoidance strategy was also proposed, utilizing the solution of an optimization problem to create a modified wall-following algorithm. The algorithm was used in conjunction with  a steering and velocity controller, with normal, backup and turn states to provide the vehicle with situational awareness. This methodology was implemented on a small-scale vehicle, specifically, the described MacAEV car, and results were gathered in a designd experiment. These results indicated both reliablity and real-time performance, hence demonstrating the validity of the approach. 
 
 
-Overall, this strategy to local planning represents a proposed alternative to laser depth scanning, promising substantial cost savings for both researchers and partners when prototyping self-driving algorithms. Future work will focus on improving both the software and hardware architecture of the system, testing performance in more complex scenarios and feasibility studies of the approach.   
+
+% Using the fused and filtered measurements, an optimization problem was solved, yielding the vectors parametrizing the lines separating obstacles from the vehicle on both sides. These vectors were used in a finite state machine controller to facilitate autonomous navigation. The approach, implemented in C++, worked in real-time as demonstrated by the results.
+
+
+This strategy to local planning represents a possible alternative to using 3D LiDAR scanning, promising substantial cost savings for both researchers and partners when prototyping self-driving algorithms. Moreover, the proposed methodology could act as a layer within a self-driving algorithm, which autonomous vehicles could use for obstacle avoidance locally while driving in real-world scenarios. 
+
+With regards to improving the software, future work will focus on parallellizing the data fusion process as well as testing and designing robust algorithms which are viable in more complex environments. In terms of hardware improvements, future work on the vehicle will involve increasing the field of vision of the camera, either through mechanical rotation or fusing data from several cameras. Lastly, future work will also focus on designing algorithms for the vehicle to perform reliably in more complex scenarios such as formation control and lane following. 
 
 % This approach to obstacle avoidance using lidar-vision sensor fusion and optimization-based navigation reduces the high cost that would ordinarily be associated with investment in a 3-d lidar.    
 
