@@ -60,7 +60,7 @@ teeluckn@mcmaster.ca} }
 \maketitle
 
 \begin{abstract}
-In this article, an approach to autonomous navigation is presented and implemented on the McMaster Autonomous Electrified Vehicle (MacAEV), a small-scale 1:10 RC vehicle equipped with low-cost sensors. First, data captured from the onboard sensors is passed through a fusion pipeline to deduce accurate information about the vehicle's surroundings. Then, using the both the solution to an optimization problem and a state machine, the vehicle is controlled to behave with enhanced situtational awareness. Using ROS 2 middleware, this methodology was implemented and acheived real-time performance, promising reduced costs to researchers seeking to contribute to the field of autonomous driving. 
+In this article, an approach to autonomous navigation is presented and implemented on the McMaster Autonomous Electrified Vehicle (MacAEV), a small-scale 1:10 RC vehicle equipped with low-cost sensors. First, data captured from the onboard sensors is passed through a fusion pipeline to deduce accurate information about the vehicle's surroundings. Then, using the both the solution to an optimization problem and a state machine, the vehicle is controlled to behave with enhanced situtational awareness. Using ROS 2 middleware, this methodology was implemented and acheived real-time performance, promising reduced costs to researchers seeking to contribute to the field of autonomous driving. This paper offers the following original contributions: (1) a design of a scaled vehicle using low-cost sensors for perception, (2) an algorithm for fusing data obtained from a 2D LiDAR and a depth camera, (3) a model predictive control approach to navigate the vehicle away from detected obstacles.
 
 
 
@@ -141,14 +141,24 @@ Moreover, a critical aspect of successful obstacle avoidance hinges on accurate 
 Vision-based approaches use either computer vision (CV) or machine learning, specifically Convolutional Neural Network (CNN)-based algorithms such as in \cite{b3}. In the context of small-scale autonomous driving, the primary limitation to this approach is the restricted awareness of the surroundings due to the narrow field of vision captured by the camera sampling data. On the other hand, 2D Lidar-based methods, such as the Follow the Gap Method Method described by Sezer et al. in \cite{b4}, analyze raw returns to detect obstacles. Yet, relying solely on data sampled from a single plane can lead to potential blind spots and missed obstacles. This paper overcomes the limitations of both approaches by proposing a methodology of fusing the data and improves on existing optimization-based control algorithms to navigate around the detected obstacles.
 
 \section{Used Algorithms}
-The algorithm used for autonomous navigation follows the pipeline shown in the Figure.   
+The algorithm used for autonomous navigation follows the pipeline shown in the Figure 3.   
 
 \begin{figure}
     \centering
     \includegraphics[scale=0.2]{diagram.png}
     \caption{Vehicle from top-view with labelled parameters used for retrieval of sensory information and control.}
-    \label{Figure 2}
+    \label{Figure 3}
 \end{figure}
+
+
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.13]{algorithm.png}
+    \caption{Outlines the algorithm in block diagram format. }
+    \label{Figure 4}
+\end{figure}
+
+
 
 \subsection{Data Fusion}
 As stated, a key limitation of 2D LiDARs is their inablity to detect obstacles above and below their scanning plane. One method of addressing this issue involves the incorporation of a depth camera and a fusion of data between both sensors. This is acheived through a frame transformation of points obtained from the depth image to the LiDAR frame, then a comparison of the ranges sampled by both sensors. If the camera measures a point to be closer than its corresponding LiDAR measurement, this means the vehicle is approaching an obstacle below or above the plane of the LiDAR scans. In this case, the corresponding LiDAR scan should be replaced by the camera measurement to give accurate information about the surroundings. This is described in Algorithm 1.
@@ -228,8 +238,27 @@ where $n_r$ and $n_l$ are the number of points sampled between $\alpha_r$ and $\
 
 % In practice, solving this problem using a quadratic program solver requires defining vector $u = [x,y,b]$ and tailoring it further to the solver's required form. It can be shown that $w_l = \frac{u}{b+1}$ and $w_r = \frac{u}{b-1}$, which is a helpful result in the implementation. 
 
+% \begin{figure}
+%     \centering
+%     \includegraphics[scale=0.11]{state_machine.png}
+%     \caption{Vehicle from top-view with labelled parameters used for retrieval of sensory information and control.}
+%     \label{Figure 5}
+% \end{figure}
+
+
 \subsection{Steering and Velocity Controller}
-To drive the motor, the VESC controller is passed an \textit{ackermann\textunderscore msg} through ROS, which is a time-stamped message containing both the input velocity $v$ and steering angle $\delta$. The MacAEV acheives autonomy through precise control of $v$ and $\delta$ within a finite state-machine, where the behaviour of the vehicle changes in response to specific inputs like the detection of an obstacle in-front or behind. The MacAEV's state machine has three states: \textit{normal}, \textit{backup} and \textit{turn}. Developed in this section, are the associated calculations and behavioural descriptions of the vehicle within these states, each of which outputting a corresponding $v$ and $\delta$ as \textit{ackermann\textunderscore msg} to the VESC controller at every time step.  
+
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.10]{state_machine.png}
+    \caption{Shows the state machine used to control the vehicle's behaviour in different scenarios.}
+\end{figure}
+
+
+To drive the motor, the VESC controller is passed an \textit{ackermann\textunderscore msg} through ROS, which is a time-stamped message containing both the input velocity $v$ and steering angle $\delta$. 
+
+
+The MacAEV acheives autonomy through precise control of $v$ and $\delta$ within a finite state-machine, where the behaviour of the vehicle changes in response to specific inputs like the detection of an obstacle in-front or behind. The MacAEV's state machine has three states: \textit{normal}, \textit{backup} and \textit{turn}. Developed in this section, are the associated calculations and behavioural descriptions of the vehicle within these states, each of which outputting a corresponding $v$ and $\delta$ as \textit{ackermann\textunderscore msg} to the VESC controller at every time step.  
 
 
 In the \textit{normal} state, the vehicle slows down in the presence of detected obstacles and maintains an appropriate distance from the barriers. Thus, the control objective for steering is to control the distance $d_{lr} = d_l - d_r$ between the left and right barriers. These distances are represented in Figure 2. The non-linear dynamics of these distances are governed by these equations:
@@ -294,7 +323,7 @@ As previously stated, velocity is controlled based on distance to an incoming ob
     v = v_{s_0}\left[1-e^{-\max(d_{min}-d_{stop},0)}\right]
 \end{equation}
 
-where $v_{s_0}$ is the maximum vehicle velocity, $d_{min}$ is the minimum Lidar range reading, and $d_{stop}$ is the vehicle stop distance for an obstacle in front of it. It can analogously be seen as a potential field, where obstacles have a high potential and  the vehicle is repelled from them. If the velocity reaches below a defined threshold for a certain amount of time, it indicates that the vehicle has stopped, which triggers a state shift to \textit{backup}. 
+where $v_{s_0}$ is the maximum vehicle velocity, $d_{min}$ is the minimum LiDAR range reading, and $d_{stop}$ is the vehicle stop distance for an obstacle in front of it. It can analogously be seen as a potential field, where obstacles have a high potential and  the vehicle is repelled from them. If the velocity reaches below a defined threshold for a certain amount of time, it indicates that the vehicle has stopped, which triggers a state shift to \textit{backup}. 
 
 The \textit{backup} state will cause the vehicle to move with the same velocity scale as in (8), however, in the opposite direction. There are two cases: either the pitch measured by odometry will indicate that the vehicle is oriented away from the closest obstacle or the vehicle will continue attempting to move backwards for a defined amount of time, after which the state will shift to \textit{turn} in both cases.
 
@@ -302,12 +331,12 @@ The \textit{turn} state is also defined with the same velocity scale as in (8). 
 
 \section{System Design and ROS Integration}
 
-\begin{figure}
-    \centering
-    \includegraphics[scale=0.15]{motor_ctrl_diagram.png}
-    \caption{Shows the TRAMPA VESC MARK VI attached on the vehicle body.}
-    \label{Figure 5}
-\end{figure}
+% \begin{figure}
+%     \centering
+%     \includegraphics[scale=0.15]{motor_ctrl_diagram.png}
+%     \caption{Shows the TRAMPA VESC MARK VI attached on the vehicle body.}
+%     \label{Figure 6}
+% \end{figure}
 
 
 
@@ -336,21 +365,21 @@ The node responsible for obstacle avoidance is \textbf{navigation}. It is subscr
 
 % Central to these interactions are onboard computations handled by an Nvidia Jetson Orin Nano embedded computer. Some key features of this device include a microSD card slot, a 40-pin Expansion Header, 4x USB 3.2 Type A ports and a Display Port Output Connector \cite{b5}. The microSD card slot allows for Ubuntu 20.04 to be flashed onto the embedded computer through the Jetpack Software Development Kit 5 (Jetpack SDK 5). The USB Type A ports permit for sensors to be serially connected to the computer, which publish data through topics within the ROS 2 middleware. In this study, the data is manipulated within C++ nodes which are subscribed to the relevant topics. 
 
-\begin{figure}
-    \centering
-    \includegraphics[scale=0.18]{lidar_diagram.png}
-    \caption{Shows the SLAMTEK A2M8 attached on the vehicle extremity.}
-    \label{Figure 3}
-\end{figure}
+% \begin{figure}
+%     \centering
+%     \includegraphics[scale=0.18]{lidar_diagram.png}
+%     \caption{Shows the SLAMTEK A2M8 attached on the vehicle extremity.}
+%     \label{Figure 7}
+% \end{figure}
 
 % The sensory modules on the MacAEV consists of a SLAMTEK A2M8 RPLIDAR, Intel RealSense Depth Camera D345, Adafruit BNO055 IMU and TRAMPA VESC MARK VI. Key features of the SLAMTEK A2M8 RPLIDAR (shown in Figure 2) include the use of TTL UART to communicate with the embedded computer, a sample rate of 8 kHz, an angular resolution of \ang{0.225} and serial baud rate of 115 200 bits per second. The RPLIDAR is connected to the Nvidia Jetson through a USB type A port and publishes both the angular heading and distance of captured point clouds \cite{b6}. Using the RPLidar in ROS 2 requires the installation of SLAMTEK's \textit{rplidar-ros2} package which allows a node capable publishing data to a topic called \textit{/scan} to be initialized.
 
-\begin{figure}
-    \centering
-    \includegraphics[scale=0.25]{realsense_diagram.png}
-    \caption{Shows the Intel RealSense Depth Camera attached to the vehicle extremity.}
-    \label{Figure 4}
-\end{figure}
+% \begin{figure}
+%     \centering
+%     \includegraphics[scale=0.25]{realsense_diagram.png}
+%     \caption{Shows the Intel RealSense Depth Camera attached to the vehicle extremity.}
+%     \label{Figure 8}
+% \end{figure}
 
 
 % The Intel RealSense Depth Camera D345 shown in Figure 3 combines both RGB and infrared stereoscopic depth cameras with an inertial measurement unit (IMU). Within the camera, the stereo-depth module captures images at 90 frames per second at a resolution of 1280 by 720 pixels, using left and right imagers. Then, data is processed by the vision processor to correct the captured image. Finally, the processed data is stored in the camera's memory through an EEPROM \cite{b7}. Using the camera in ROS 2 requires the installation of the \textit{realsense-ros} package, which enables the use of the \textit{realsense2\textunderscore camera} node. This node publishes color, depth, extrinsic and inertial measurements across eight different topics. The algorithms used for autonomous navigation in this paper rely on depth imaging. 
@@ -365,9 +394,9 @@ The node responsible for obstacle avoidance is \textbf{navigation}. It is subscr
 
 \begin{figure*}
     \centering
-    \includegraphics[width=\textwidth]{rqt_graph.png}
+    \includegraphics[scale=0.9]{rosgraph4.png}
     \caption{Shows ROS software architecture of the system, produced by rqt. Nodes are depicted by ovals, while topics are boxed. This architecture is modified from University Pennsylvania's F1Tenth system.}
-    \label{Figure 6}
+    \label{Figure 9}
 \end{figure*}
 
 
@@ -420,7 +449,14 @@ The node responsible for obstacle avoidance is \textbf{navigation}. It is subscr
 
 
 \section{Experimental Results}
-To evaluate the approach, an experiment was carried out in the corridor using boxes of the types shown in Figure 7. For simplicity, they will be referred to as either Type I or II boxes, based on their detectability by the sensory modules.
+To evaluate the approach, an experiment was carried out in the corridor using boxes of the types shown in Figure 6. For simplicity, they will be referred to as either Type I or II boxes, based on their detectability by the sensory modules.
+
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.3]{IMG_0506.jpg}
+    \caption{Corridor used for experimental trials.}
+    \label{Figure 11}
+\end{figure}
 
 As seen in Figure 8, the obstacles are placed along the corridor in the order Type I, Type II, Type II, Type I. These obstacles will be referred to as obstacle I, II, III and IV respectively. Each trial begins with the car placed at the start point where autonomous navigation is activated. Then, The car is observed in both the real-world and within the rqt environment, allowing real-time monitoring of both detection and avoidance. The trial ends once the car avoids each of the obstacles in reverse order and returns to the start point. 
 
@@ -436,16 +472,9 @@ Using only LiDAR data, obstacle I and IV were never detected while obstacle II a
     \centering
     \includegraphics[scale=0.2]{paper_obstacle_image.png}
     \caption{Obstacles used to evaluate detection and avoidance. a) Type I obstacle that is only detectable by camera. b) Type II obstacle that is detectable by both LiDAR and camera.}
-    \label{Figure 7}
+    \label{Figure 10}
 \end{figure}
 
-
-\begin{figure}
-    \centering
-    \includegraphics[scale=0.3]{IMG_0506.jpg}
-    \caption{Corridor used for experimental trials.}
-    \label{Figure 8}
-\end{figure}
 
 
 

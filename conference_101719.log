@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2024.8.15)  25 AUG 2024 06:48
+This is pdfTeX, Version 3.141592653-2.6-1.40.22 (TeX Live 2022/dev/Debian) (preloaded format=pdflatex 2024.8.15)  27 AUG 2024 12:49
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -421,66 +421,56 @@ File: diagram.png Graphic file (type png)
 <use diagram.png>
 Package pdftex.def Info: diagram.png  used on input line 148.
 (pdftex.def)             Requested size: 180.6718pt x 135.50385pt.
- [2 <./diagram.png>] [3]
-<motor_ctrl_diagram.png, id=29, 803.0pt x 602.25pt>
-File: motor_ctrl_diagram.png Graphic file (type png)
-<use motor_ctrl_diagram.png>
-Package pdftex.def Info: motor_ctrl_diagram.png  used on input line 307.
-(pdftex.def)             Requested size: 120.4448pt x 90.33359pt.
-<lidar_diagram.png, id=30, 702.625pt x 532.99126pt>
-File: lidar_diagram.png Graphic file (type png)
-<use lidar_diagram.png>
-Package pdftex.def Info: lidar_diagram.png  used on input line 341.
-(pdftex.def)             Requested size: 126.46704pt x 95.93428pt.
-<realsense_diagram.png, id=31, 501.37312pt x 394.47375pt>
-File: realsense_diagram.png Graphic file (type png)
-<use realsense_diagram.png>
-Package pdftex.def Info: realsense_diagram.png  used on input line 350.
-(pdftex.def)             Requested size: 125.34297pt x 98.6182pt.
-<rqt_graph.png, id=32, 1374.63562pt x 438.13687pt>
-File: rqt_graph.png Graphic file (type png)
-<use rqt_graph.png>
-Package pdftex.def Info: rqt_graph.png  used on input line 368.
-(pdftex.def)             Requested size: 516.0pt x 164.46136pt.
- [4 <./motor_ctrl_diagram.png> <./lidar_diagram.png> <./realsense_diagram.png>]
+<algorithm.png, id=14, 1806.75pt x 987.69pt>
+File: algorithm.png Graphic file (type png)
+<use algorithm.png>
+Package pdftex.def Info: algorithm.png  used on input line 156.
+(pdftex.def)             Requested size: 234.88574pt x 128.4042pt.
+ [2 <./diagram.png> <./algorithm.png>]
+<state_machine.png, id=22, 2491.05656pt x 1509.38907pt>
+File: state_machine.png Graphic file (type png)
+<use state_machine.png>
+Package pdftex.def Info: state_machine.png  used on input line 253.
+(pdftex.def)             Requested size: 249.12025pt x 150.94774pt.
+ [3 <./state_machine.png>]
+<rosgraph4.png, id=28, 540.59406pt x 170.71391pt>
+File: rosgraph4.png Graphic file (type png)
+<use rosgraph4.png>
+Package pdftex.def Info: rosgraph4.png  used on input line 397.
+(pdftex.def)             Requested size: 486.53015pt x 153.64108pt.
+<IMG_0506.jpg, id=29, 642.4pt x 481.8pt>
+File: IMG_0506.jpg Graphic file (type jpg)
+<use IMG_0506.jpg>
+Package pdftex.def Info: IMG_0506.jpg  used on input line 456.
+(pdftex.def)             Requested size: 192.72148pt x 144.5411pt.
+ [4]
 <paper_obstacle_image.png, id=36, 1075.01625pt x 361.35pt>
 File: paper_obstacle_image.png Graphic file (type png)
 <use paper_obstacle_image.png>
-Package pdftex.def Info: paper_obstacle_image.png  used on input line 437.
+Package pdftex.def Info: paper_obstacle_image.png  used on input line 473.
 (pdftex.def)             Requested size: 214.99944pt x 72.2687pt.
-<IMG_0506.jpg, id=37, 642.4pt x 481.8pt>
-File: IMG_0506.jpg Graphic file (type jpg)
-<use IMG_0506.jpg>
-Package pdftex.def Info: IMG_0506.jpg  used on input line 445.
-(pdftex.def)             Requested size: 192.72148pt x 144.5411pt.
-
-Underfull \vbox (badness 3679) has occurred while \output is active []
-
-
-Underfull \vbox (badness 6094) has occurred while \output is active []
-
- [5 <./rqt_graph.png> <./paper_obstacle_image.png> <./IMG_0506.jpg>]
-Underfull \hbox (badness 10000) in paragraph at lines 743--744
+ [5 <./rosgraph4.png> <./IMG_0506.jpg> <./paper_obstacle_image.png>]
+Underfull \hbox (badness 10000) in paragraph at lines 772--773
 \OT1/ptm/m/n/8 https://developer.nvidia.com/embedded/learn/jetson-agx-orin-devkit-
  []
 
 
-Underfull \hbox (badness 6110) in paragraph at lines 746--747
+Underfull \hbox (badness 6110) in paragraph at lines 775--776
 []\OT1/ptm/m/n/8 RPLIDAR A2 Low Cost 360 De-gree Laser Range Scan-ner,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 746--747
+Underfull \hbox (badness 10000) in paragraph at lines 775--776
 \OT1/ptm/m/n/8 https://www.slamtec.ai/wp-content/uploads/2023/11/LD310
  []
 
 
-Underfull \hbox (badness 1521) in paragraph at lines 754--755
+Underfull \hbox (badness 1521) in paragraph at lines 783--784
 []\OT1/ptm/m/n/8 D. Gold-farb and A. Id-nani, \A nu-mer-i-cally sta-ble dual method
  []
 
 
-Underfull \hbox (badness 1596) in paragraph at lines 754--755
+Underfull \hbox (badness 1596) in paragraph at lines 783--784
 \OT1/ptm/m/n/8 for solv-ing strictly con-vex quadratic pro-grams," Sep. 1983, doi:
  []
 
@@ -499,18 +489,18 @@ Before submitting the final camera ready copy, remember to:
 
 ] (./conference_101719.aux) ) 
 Here is how much of TeX's memory you used:
- 10076 strings out of 478287
- 211102 string characters out of 5849289
- 501013 words of memory out of 5000000
- 28156 multiletter control sequences out of 15000+600000
+ 10066 strings out of 478287
+ 210834 string characters out of 5849289
+ 497997 words of memory out of 5000000
+ 28148 multiletter control sequences out of 15000+600000
  507871 words of font info for 103 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 71i,12n,79p,1006b,583s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 71i,12n,79p,1067b,583s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi5.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr5.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmbi8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on conference_101719.pdf (6 pages, 4047282 bytes).
+Output written on conference_101719.pdf (6 pages, 12649103 bytes).
 PDF statistics:
- 100 PDF objects out of 1000 (max. 8388607)
+ 99 PDF objects out of 1000 (max. 8388607)
  55 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
- 41 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 36 words of extra memory for PDF output out of 10000 (max. 10000000)
 

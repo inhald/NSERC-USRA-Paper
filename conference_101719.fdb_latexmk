@@ -1,7 +1,7 @@
 # Fdb version 3
-["pdflatex"] 1724582883 "/home/dhilan/latex_projects/a_ros_based_approach/conference_101719.tex" "conference_101719.pdf" "conference_101719" 1724582886
+["pdflatex"] 1724777374 "/home/dhilan/latex_projects/a_ros_based_approach/conference_101719.tex" "conference_101719.pdf" "conference_101719" 1724777380
   "/etc/texmf/web2c/texmf.cnf" 1723745978 475 c0e671620eb5563b2130f56340a5fde8 ""
-  "/home/dhilan/latex_projects/a_ros_based_approach/conference_101719.tex" 1724582883 53729 ed8f47f40e4d13f89e717f8e21c89d10 ""
+  "/home/dhilan/latex_projects/a_ros_based_approach/conference_101719.tex" 1724777367 54689 f0f0341407eaabe020cf8dbbf6c8acfb ""
   "/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc" 1165713224 4850 80dc9bab7f31fb78a000ccfed0e27cab ""
   "/usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/adobe/times/ptmb7t.tfm" 1136768653 2172 fd0c924230362ff848a33632ed45dc23 ""
@@ -101,14 +101,13 @@
   "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1723750856 2798823 a06c2b51c52caaba385d989edf96e531 ""
   "IEEEtran.cls" 1723779200 281957 5b2e4fa15b0f7eabb840ebf67df4c0f7 ""
   "IMG_0506.jpg" 1724356293 104175 070f9c3e4232031d5a3b397d00a72291 ""
-  "conference_101719.aux" 1724582886 3752 692b0184425acab901f0e45736df7d0d "pdflatex"
-  "conference_101719.tex" 1724582883 53729 ed8f47f40e4d13f89e717f8e21c89d10 ""
-  "diagram.png" 1723779200 120384 5dc1e35ebbddf3920d0b116068545c7f ""
-  "lidar_diagram.png" 1723779200 406515 c28cc7dc3e4f055e966fc978aae51f44 ""
-  "motor_ctrl_diagram.png" 1723779200 709874 701e0ae8bf05135f00ff4ab75576ab70 ""
+  "algorithm.png" 1724701475 212515 845416aaec320f8ae653a70492cae9a7 ""
+  "conference_101719.aux" 1724777380 3541 91fe296fca9799a8067caa291792b843 "pdflatex"
+  "conference_101719.tex" 1724777367 54689 f0f0341407eaabe020cf8dbbf6c8acfb ""
+  "diagram.png" 1724680903 123101 4f56bc5252f85f6477bd00b636a06164 ""
   "paper_obstacle_image.png" 1724358149 935146 d6c705a4d975fc98c7ba8a81fe694db6 ""
-  "realsense_diagram.png" 1723779200 393440 f6bedc221bc490a7abfd57baf190e5c8 ""
-  "rqt_graph.png" 1724272333 161267 1bb6a54ba0f697fa78bd1d794c2ae403 ""
+  "rosgraph4.png" 1724773145 5173001 6215d5c3e6ed31a12844e1b9ce2c3cb6 ""
+  "state_machine.png" 1724775191 323510 e8de0f2caeab92b6970005f94a77d66e ""
   "vehicle.png" 1723779200 441856 4225f514cb2bc656376a9a1e7bc91f22 ""
   (generated)
   "conference_101719.aux"
