@@ -141,20 +141,13 @@ Moreover, a critical aspect of successful obstacle avoidance hinges on accurate 
 Vision-based approaches use either computer vision (CV) or machine learning, specifically Convolutional Neural Network (CNN)-based algorithms such as in \cite{b3}. In the context of small-scale autonomous driving, the primary limitation to this approach is the restricted awareness of the surroundings due to the narrow field of vision captured by the camera sampling data. On the other hand, 2D Lidar-based methods, such as the Follow the Gap Method Method described by Sezer et al. in \cite{b4}, analyze raw returns to detect obstacles. Yet, relying solely on data sampled from a single plane can lead to potential blind spots and missed obstacles. This paper overcomes the limitations of both approaches by proposing a methodology of fusing the data and improves on existing optimization-based control algorithms to navigate around the detected obstacles.
 
 \section{Used Algorithms}
-The algorithm used for autonomous navigation follows the pipeline shown in the Figure 3.   
-
-\begin{figure}
-    \centering
-    \includegraphics[scale=0.2]{diagram.png}
-    \caption{Vehicle from top-view with labelled parameters used for retrieval of sensory information and control.}
-    \label{Figure 3}
-\end{figure}
+The algorithm used for autonomous navigation follows the pipeline shown in the Figure 2.   
 
 
-\begin{figure}
+\begin{figure}[h!]
     \centering
     \includegraphics[scale=0.13]{algorithm.png}
-    \caption{Outlines the algorithm in block diagram format. }
+    \caption{Outlines the algorithm in block diagram format.}
     \label{Figure 4}
 \end{figure}
 
@@ -204,6 +197,13 @@ The heading angle, $\theta_{head}$, represents the intended direction of travel 
 Two design parameters $\alpha_l$ and $\beta_l$, which are angles oriented on the left of $\theta_{head}$, are chosen.  The range measurements between these two angles are sampled and used to calculate the left barrier, as described in subsection D below. Similarly, on the right side, $\alpha_r$ and $\beta_r$ are chosen, and the corresponding range measurements are used to calculate the right barrier. 
 
 % As shown in Figure \ref{Figure 2}, the scans are sub-sampled between $\alpha_l$ and $\beta_l$, as well as $\alpha_r$ and $\beta_r$ which are used to form the left and right barriers respectively. The distance between the origin of the frame and the calculated walls is maximized based on these returns. 
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[scale=0.2]{diagram.png}
+    \caption{Vehicle from top-view with labelled parameters used for retrieval of sensory information and control.}
+    \label{Figure 3}
+\end{figure}
 
 \subsection{Finding the Barriers}
 Suppose $w \in \Re^2$  is the vector which parametrizes the line separating the scans from the vehicle. The minimum distance, $d$, between the origin of the frame, centered at the LiDAR, and the line is given by:
@@ -255,13 +255,25 @@ where $n_r$ and $n_l$ are the number of points sampled between $\alpha_r$ and $\
 \end{figure}
 
 
-To drive the motor, the VESC controller is passed an \textit{ackermann\textunderscore msg} through ROS, which is a time-stamped message containing both the input velocity $v$ and steering angle $\delta$. 
+% To drive the motor, the VESC controller is passed an \textit{ackermann\textunderscore msg} through ROS, which is a time-stamped message containing both the input velocity $v$ and steering angle $\delta$. 
 
 
-The MacAEV acheives autonomy through precise control of $v$ and $\delta$ within a finite state-machine, where the behaviour of the vehicle changes in response to specific inputs like the detection of an obstacle in-front or behind. The MacAEV's state machine has three states: \textit{normal}, \textit{backup} and \textit{turn}. Developed in this section, are the associated calculations and behavioural descriptions of the vehicle within these states, each of which outputting a corresponding $v$ and $\delta$ as \textit{ackermann\textunderscore msg} to the VESC controller at every time step.  
+The vehicle requires both a steering angle $\delta$ and a velocity $v$ as control inputs to the motor driver. Therefore, to achieve autonomy, these inputs must be appropriately selected in order for the vehicle to demonstrate appropriate behaviour in different scenarios. As shown in Figure 4, the designed finite state machine was attributed three states: \textbf{normal}, \textbf{backup} and \textbf{turn}. 
 
+In the \textbf{normal} state, the vehicle navigates around obstacles as usual. However, in the event that it is not feasible for the vehicle to travel forward, the \textbf{backup} state is triggered and the vehicle will attempt to move backwards without colliding with the surroundings. Finally, when the vehicle is able to turn without colliding, the \textbf{turn} state will be triggered and the vehicle will steer itself opposite to its original direction. 
 
-In the \textit{normal} state, the vehicle slows down in the presence of detected obstacles and maintains an appropriate distance from the barriers. Thus, the control objective for steering is to control the distance $d_{lr} = d_l - d_r$ between the left and right barriers. These distances are represented in Figure 2. The non-linear dynamics of these distances are governed by these equations:
+% is achieved by precise control of $v$ and $\delta$ within a finite state-machine, where the behaviour of the vehicle changes in response to specific inputs like the detection of an obstacle in-front or behind. 
+
+% The MacAEV's state machine has three states: \textit{normal}, \textit{backup} and \textit{turn}. Developed in this section, are the associated calculations and behavioural descriptions of the vehicle within these states, each of which outputting a corresponding $v$ and $\delta$ as \textit{ackermann\textunderscore msg} to the VESC controller at every time step.  
+The vehicle's speed is reduced as it approaches obstacles a corresponding variant of the following equation based on state: 
+
+\begin{equation}
+    v = \pm v_{s_0}\left[1-e^{-\max(d_{min}-d_{stop},0)}\right]
+\end{equation}
+
+where $v_{s_0}$ is the maximum vehicle velocity, $d_{min}$ is the minimum LiDAR range reading, and $d_{stop}$ is the vehicle stop distance for an obstacle in front of it. When the vehicle reverses, it follows a similar pattern but in the opposite direction, hence the case of the negative sign. The \textbf{turn} state velocity input is set to zero. 
+
+In the \textbf{normal} state, the control objective for steering is to maximize the distance $d_{lr} = d_l - d_r$ between the left and right barriers. These distances are represented in Figure 2. The non-linear dynamics of these distances are governed by these equations:
 
 
 \begin{equation}
@@ -276,7 +288,7 @@ In the \textit{normal} state, the vehicle slows down in the presence of detected
     \end{aligned}
 \end{equation}
 
-Equation (3) arises as a result of the bicycle kinematic model, used to derive the dynamics of the system. Moreover, the tracking error of $d_{lr}$ is minimized using a PD controller, the output of which is used to subsequently calculate the required steering angle $\delta$. 
+Equation (4) arises as a result of the bicycle kinematic model, used to derive the dynamics of the system. Moreover, the tracking error of $d_{lr}$ is minimized using a PD controller, the output of which is used to subsequently calculate the required steering angle $\delta$. 
 
 \begin{equation}
         \delta_{lr} = \arctan \left( \frac{l ( k_p \Tilde{d_{lr}} +k_d \dot{d_{lr}} )}{v_s^2(\cos \alpha_{r} + \cos \alpha_{l} )} \right) 
@@ -305,7 +317,7 @@ These distances can be expressed in terms of the horizontal components of the ve
 \end{equation}
 
 
-Combining equations (4), (5) and (6) produces the closed form expression used in the implementation of the controller to find $\delta$.
+Combining equations (5), (6) and (7) produces the closed form expression used in the implementation of the controller to find $\delta$.
 
 \begin{equation}
     \begin{aligned}
@@ -317,17 +329,17 @@ where $w_{ry}$ and $w_{ly}$ denote the y-component of the right and left wall ve
 
 
 
-As previously stated, velocity is controlled based on distance to an incoming obstacle. This is given by:
+% As previously stated, velocity is controlled based on distance to an incoming obstacle. This is given by:
 
-\begin{equation}
-    v = v_{s_0}\left[1-e^{-\max(d_{min}-d_{stop},0)}\right]
-\end{equation}
+% \begin{equation}
+%     v = v_{s_0}\left[1-e^{-\max(d_{min}-d_{stop},0)}\right]
+% \end{equation}
 
-where $v_{s_0}$ is the maximum vehicle velocity, $d_{min}$ is the minimum LiDAR range reading, and $d_{stop}$ is the vehicle stop distance for an obstacle in front of it. It can analogously be seen as a potential field, where obstacles have a high potential and  the vehicle is repelled from them. If the velocity reaches below a defined threshold for a certain amount of time, it indicates that the vehicle has stopped, which triggers a state shift to \textit{backup}. 
+% where $v_{s_0}$ is the maximum vehicle velocity, $d_{min}$ is the minimum LiDAR range reading, and $d_{stop}$ is the vehicle stop distance for an obstacle in front of it. It can analogously be seen as a potential field, where obstacles have a high potential and  the vehicle is repelled from them. If the velocity reaches below a defined threshold for a certain amount of time, it indicates that the vehicle has stopped, which triggers a state shift to \textit{backup}. 
 
-The \textit{backup} state will cause the vehicle to move with the same velocity scale as in (8), however, in the opposite direction. There are two cases: either the pitch measured by odometry will indicate that the vehicle is oriented away from the closest obstacle or the vehicle will continue attempting to move backwards for a defined amount of time, after which the state will shift to \textit{turn} in both cases.
+When the \textbf{backup} state is triggered, there are two cases (I and II), both of which result in the \textbf{turn} state being triggered. In case I, the pitch measured by odometry indicates that the vehicle is oriented away from the closest obstacle, and thus it is able to turn with ease. In case II, the vehicle is not moving, likely due to the presence of an obstacle behind it, and thus, it will shift states after some time $t_0$. 
 
-The \textit{turn} state is also defined with the same velocity scale as in (8). If the vehicle is already oriented away from the closest obstacle, then a state shift will be triggered to return to \textit{normal}. Otherwise, the steering angle will be set to maximum and if the vehicle is still unable orient itself away from obstacles, then it will return to the \textit{backup} state.
+The \textbf{turn} state has two outcomes, resulting in either the \textbf{normal} or \textbf{backup} states being triggered. If the vehicle is already oriented away from the closest obstacle, then a state shift will be triggered to return to \textbf{normal}. Otherwise, the steering angle will be set to maximum and if the vehicle is still unable orient itself away from obstacles, then it will return to the \textbf{backup} state after some time $t_1$.
 
 \section{System Design and ROS Integration}
 
@@ -349,19 +361,27 @@ The McMaster AEV car, powered by a VENOM 3S lithium-polymer (LiPo) Battery, is b
 
 The system inputs are:
 \begin{itemize}
-    \item \textbf{SLAMTEK A2M8 RPLIDAR} (Figure 3): Communicates with UART, a sampling rate of 8 kHz, angular resolution of \ang{0.225}, serial baudrate of 115200 bits per second \cite{b6}.
-    \item \textbf{Intel RealSense Depth Camera D345} (Figure 4): Captures images at 90 fps, resolution of 1280 x 720, uses internal vision processor to correct image captured by left and right imagers \cite{b7}.
+    \item \textbf{SLAMTEK A2M8 RPLIDAR}: Communicates with UART, a sampling rate of 8 kHz, angular resolution of \ang{0.225}, serial baudrate of 115200 bits per second \cite{b6}.
+    \item \textbf{Intel RealSense Depth Camera D345} : Captures images at 90 fps, resolution of 1280 x 720, uses internal vision processor to correct image captured by left and right imagers \cite{b7}.
 \end{itemize}
 
 The system outputs are:
 
 \begin{itemize}
-    \item \textbf{TRAMPA VESC MKVI} (Figure 5): Motor driver responsible for controlling Brushless DC (BL DC) motors and servos. Built-in wheel odometry, yielding velocity and orientation of vehicle.
+    \item \textbf{TRAMPA VESC MKVI}: Motor driver responsible for controlling Brushless DC (BL DC) motors and servos. Built-in wheel odometry, yielding velocity and orientation of vehicle.
 \end{itemize} 
 
 The sensory modules and motor driver interface with the embedded computer through ROS-based drivers. As shown in Figure 6, data obtained from the inputs is published through specific topics, namely, LiDAR scans and camera images are published to the \textbf{/scan2} and \textbf{/camera/depth/image\textunderscore rect\textunderscore raw} topics respectively. To make the LiDAR data easier to manipulate for navigation, it is passed through the \textbf{experiment} node and republished through the \textbf{/scan} topic. 
 
 The node responsible for obstacle avoidance is \textbf{navigation}. It is subscribed to \textbf{/scan}, \textbf{/odom}, \textbf{/camera/depth/camera\textunderscore info} and \textbf{/camera/depth/image\textunderscore rect\textunderscore raw}. Using the described algorithm, it publishes ackermann msgs, meaning both a velocity and steering angle, to the \textbf{/drive} topic. The \textbf{ackermann\textunderscore mux} node is subscribed to this topic, which publishes these commands to the \textbf{/command/motor/speed} and \textbf{/command/servo/position} topic when the vehicle is in autonomous navigation mode. These topics directly modify motor speed and servo position. 
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[scale=0.2]{paper_obstacle_image.png}
+    \caption{Obstacles used to evaluate detection and avoidance. a) Type I obstacle that is only detectable by camera. b) Type II obstacle that is detectable by both LiDAR and camera.}
+    \label{Figure 10}
+\end{figure}
+
 
 % Central to these interactions are onboard computations handled by an Nvidia Jetson Orin Nano embedded computer. Some key features of this device include a microSD card slot, a 40-pin Expansion Header, 4x USB 3.2 Type A ports and a Display Port Output Connector \cite{b5}. The microSD card slot allows for Ubuntu 20.04 to be flashed onto the embedded computer through the Jetpack Software Development Kit 5 (Jetpack SDK 5). The USB Type A ports permit for sensors to be serially connected to the computer, which publish data through topics within the ROS 2 middleware. In this study, the data is manipulated within C++ nodes which are subscribed to the relevant topics. 
 
@@ -449,31 +469,40 @@ The node responsible for obstacle avoidance is \textbf{navigation}. It is subscr
 
 
 \section{Experimental Results}
-To evaluate the approach, an experiment was carried out in the corridor using boxes of the types shown in Figure 6. For simplicity, they will be referred to as either Type I or II boxes, based on their detectability by the sensory modules.
+To evaluate the approach, an experiment was carried out in the corridor using boxes of the types shown in Figure 5. For simplicity, they will be referred to as either Type I or II boxes, based on their detectability by the sensory modules.
 
-\begin{figure}
+
+As seen in Figure 7, the obstacles are placed along the corridor in the order Type I, Type II, Type II, Type I. These obstacles will be referred to as obstacle I, II, III and IV respectively. Each trial begins with the car placed at the start point where autonomous navigation is activated. Then, The car is observed in both the real-world and within the rqt environment, allowing real-time monitoring of both detection and avoidance. The trial ends once the car avoids each of the obstacles in reverse order and returns to the start point. 
+
+\begin{figure}[h!]
     \centering
     \includegraphics[scale=0.3]{IMG_0506.jpg}
     \caption{Corridor used for experimental trials.}
     \label{Figure 11}
 \end{figure}
 
-As seen in Figure 8, the obstacles are placed along the corridor in the order Type I, Type II, Type II, Type I. These obstacles will be referred to as obstacle I, II, III and IV respectively. Each trial begins with the car placed at the start point where autonomous navigation is activated. Then, The car is observed in both the real-world and within the rqt environment, allowing real-time monitoring of both detection and avoidance. The trial ends once the car avoids each of the obstacles in reverse order and returns to the start point. 
-
 Ten trials of the experiment were performed without fusing the sensor data. Obstacles which had been displaced by collisions during the initial approach were excluded on return from the final results. The same process was repeated with the car navigating autonomously using fused sensor data.
 
-Using only LiDAR data, obstacle I and IV were never detected while obstacle II and III were sucessfully detected in all of the trials. Using the data fusion pipeline, obstacle I, II, III and IV were detected in 95\%, 100\%, 100\% and 94.1\%  of trials respectively. Furthermore, using only LiDAR data, the avoidance rates for obstacles I, II, III and IV were 0\%, 95\%, 100\% and 0\% respectively. On the other hand, using the data fusion pipeline, the avoidance rates for obstacles I, II, III and IV were 95\%, 95\%, 100\% and 94.1\% respectively. This indicates a clear improvement in both detection and avoidance using the data fusion pipeline. 
+Using only LiDAR data, obstacle I and IV were never detected while obstacle II and III were sucessfully detected in all of the trials. Using the data fusion pipeline, obstacle I, II, III and IV were detected in 95\%, 100\%, 100\% and 100\%  of trials respectively. Furthermore, using only LiDAR data, the avoidance rates for obstacles I, II, III and IV were 0\%, 95\%, 100\% and 0\% respectively. On the other hand, using the data fusion pipeline, the avoidance rates for obstacles I, II, III and IV were 95\%, 95\%, 100\% and 88.9\% respectively. This indicates a clear improvement in both detection and avoidance using the data fusion pipeline. 
 
-
-
-
-
-\begin{figure}
-    \centering
-    \includegraphics[scale=0.2]{paper_obstacle_image.png}
-    \caption{Obstacles used to evaluate detection and avoidance. a) Type I obstacle that is only detectable by camera. b) Type II obstacle that is detectable by both LiDAR and camera.}
-    \label{Figure 10}
-\end{figure}
+\begin{table}[ht]
+\centering
+\caption{Experimental Results}
+\begin{tabular}{||p{2cm}|c|c|c|c||}
+\hline
+ & Obs I & Obs II & Obs III & Obs IV \\
+\hline \hline
+Detection Rate (No Fusion) & 0/10 & 20/20 & 20/20 & 0/10 \\
+\hline
+Detection Rate (Fusion) & 19/20 & 20/20 & 20/20 & 18/18\\
+\hline
+Avoidance Rate (No Fusion) & 0/10 & 19/20 & 20/20 & 0/10 \\
+\hline
+Avoidance Rate (Fusion) & 19/20 & 19/20 & 20/20 & 16/18 \\ 
+\hline
+\end{tabular}
+\label{table:1}
+\end{table}
 
 
 
